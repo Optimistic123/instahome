@@ -84,6 +84,12 @@ function AdminDashboard({ user }) {
     agent.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Filter for agent view - by agent name
+  const filteredAgentsForView = agents.filter(agent =>
+    agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    agent.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <header className="glass-effect sticky top-0 z-50 border-b">
