@@ -290,19 +290,19 @@ async def seed_database():
     print("Creating visit requests...")
     visit_requests = [
         {
-            \"visit_id\": f\"visit_{uuid.uuid4().hex[:12]}\",
-            \"property_id\": properties[0][\"property_id\"],
-            \"user_id\": tenant1_id,
-            \"user_name\": \"Jessica Williams\",
-            \"user_email\": \"tenant1@rental.com\",
-            \"user_phone\": \"+1-555-0301\",
-            \"status\": \"pending\",
-            \"stage\": \"talked\",
-            \"assigned_agent_id\": agent1_id,
-            \"notes\": \"Interested in viewing this weekend\",
-            \"preferred_date\": (datetime.now(timezone.utc) + timedelta(days=2)).isoformat(),
-            \"created_at\": datetime.now(timezone.utc).isoformat(),
-            \"updated_at\": datetime.now(timezone.utc).isoformat()
+            "visit_id": f"visit_{uuid.uuid4().hex[:12]}",
+            "property_id": properties[0]["property_id"],
+            "user_id": tenant1_id,
+            "user_name": "Jessica Williams",
+            "user_email": "tenant1@rental.com",
+            "user_phone": "+1-555-0301",
+            "status": "pending",
+            "stage": "talked",
+            "assigned_agent_id": agent1_id,
+            "notes": "Interested in viewing this weekend",
+            "preferred_date": (datetime.now(timezone.utc) + timedelta(days=2)).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
         },
         {
             \"visit_id\": f\"visit_{uuid.uuid4().hex[:12]}\",
