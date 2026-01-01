@@ -3,10 +3,10 @@ import { api } from '../../App';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, LogOut, Clock } from 'lucide-react';
+import { Building2, LogOut, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 function AgentDashboard({ user }) {
@@ -14,6 +14,7 @@ function AgentDashboard({ user }) {
   const [visits, setVisits] = useState([]);
   const [properties, setProperties] = useState([]);
   const [stageFilter, setStageFilter] = useState('all');
+  const [expandedRows, setExpandedRows] = useState(new Set());
 
   useEffect(() => {
     fetchVisits();
