@@ -226,7 +226,14 @@ async def login(credentials: UserLogin):
 @api_router.post("/auth/session")
 async def create_session_from_oauth(x_session_id: str = Header(...)):
     try:
-        session_data = await emerge_client.auth.get_session_data(x_session_id)
+        # REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": x_session_id}
+            )
+            response.raise_for_status()
+            session_data = response.json()
         
         user_id = f"user_{uuid.uuid4().hex[:12]}"
         existing_user = await db.users.find_one({"email": session_data["email"]}, {"_id": 0})
