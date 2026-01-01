@@ -105,7 +105,41 @@ function OwnerDashboard({ user }) {
         </div>
 
         <div className="bg-card rounded-xl border p-6">
-          <h2 className="text-2xl font-bold mb-6">Property Earnings</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">Property Earnings</h2>
+            <div className="flex items-center gap-4">
+              <div className="relative w-64">
+                <Input
+                  placeholder="Search properties..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-10"
+                  data-testid="owner-search-input"
+                />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                    data-testid="clear-search-button"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+                <SelectTrigger className="w-40" data-testid="payment-filter">
+                  <SelectValue placeholder="All Payments" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Payments</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="overdue">Overdue</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -117,9 +151,19 @@ function OwnerDashboard({ user }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {dashboard.property_earnings.map((property) => (
+              {filteredProperties.map((property) => (
                 <TableRow key={property.property_id}>
-                  <TableCell className="font-medium">{property.title}</TableCell>
+                  <TableCell className="font-medium">
+                    <a
+                      href={`/properties/${property.property_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                      data-testid={`property-link-${property.property_id}`}
+                    >
+                      {property.title}
+                    </a>
+                  </TableCell>
                   <TableCell>${property.rent_amount.toLocaleString()}</TableCell>
                   <TableCell>
                     <Badge variant={property.status === 'occupied' ? 'default' : 'secondary'}>
@@ -138,6 +182,11 @@ function OwnerDashboard({ user }) {
               ))}
             </TableBody>
           </Table>
+          {filteredProperties.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No properties found
+            </div>
+          )}
         </div>
       </div>
     </div>
