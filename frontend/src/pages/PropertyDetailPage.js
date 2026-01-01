@@ -168,68 +168,63 @@ function PropertyDetailPage() {
                 </div>
               </div>
 
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="w-full h-12 rounded-full text-base" data-testid="request-visit-button">
-                    Request a Visit
+              <div className="pt-4 border-t">
+                <h3 className="text-lg font-semibold mb-4">Request Property Visit</h3>
+                <form onSubmit={handleVisitRequest} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="John Doe"
+                      value={visitData.name}
+                      onChange={(e) => setVisitData({ ...visitData, name: e.target.value })}
+                      required
+                      data-testid="name-input"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+1-555-1234"
+                      value={visitData.phone}
+                      onChange={(e) => setVisitData({ ...visitData, phone: e.target.value })}
+                      data-testid="phone-input"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="preferred_date">Preferred Date</Label>
+                    <Input
+                      id="preferred_date"
+                      type="date"
+                      value={visitData.preferred_date}
+                      onChange={(e) => setVisitData({ ...visitData, preferred_date: e.target.value })}
+                      data-testid="date-input"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">Additional Notes</Label>
+                    <Textarea
+                      id="notes"
+                      placeholder="Any special requests or questions..."
+                      value={visitData.notes}
+                      onChange={(e) => setVisitData({ ...visitData, notes: e.target.value })}
+                      data-testid="notes-input"
+                      rows={3}
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    disabled={submitting} 
+                    className="w-full h-12 rounded-full text-base" 
+                    data-testid="request-visit-button"
+                  >
+                    {submitting ? 'Submitting...' : 'Request a Visit'}
                   </Button>
-                </DialogTrigger>
-                <DialogContent data-testid="visit-request-dialog">
-                  <DialogHeader>
-                    <DialogTitle>Request Property Visit</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleVisitRequest} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        type="text"
-                        placeholder="John Doe"
-                        value={visitData.name}
-                        onChange={(e) => setVisitData({ ...visitData, name: e.target.value })}
-                        required
-                        data-testid="name-input"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="+1-555-1234"
-                        value={visitData.phone}
-                        onChange={(e) => setVisitData({ ...visitData, phone: e.target.value })}
-                        data-testid="phone-input"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="preferred_date">Preferred Date</Label>
-                      <Input
-                        id="preferred_date"
-                        type="date"
-                        value={visitData.preferred_date}
-                        onChange={(e) => setVisitData({ ...visitData, preferred_date: e.target.value })}
-                        data-testid="date-input"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="notes">Additional Notes</Label>
-                      <Textarea
-                        id="notes"
-                        placeholder="Any special requests or questions..."
-                        value={visitData.notes}
-                        onChange={(e) => setVisitData({ ...visitData, notes: e.target.value })}
-                        data-testid="notes-input"
-                      />
-                    </div>
-                    <DialogFooter>
-                      <Button type="submit" disabled={submitting} className="w-full rounded-full" data-testid="submit-visit-request">
-                        {submitting ? 'Submitting...' : 'Submit Request'}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                </form>
+              </div>
 
               <p className="text-xs text-muted-foreground text-center">
                 Our team will contact you within 24 hours to schedule your visit
