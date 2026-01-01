@@ -92,22 +92,9 @@ function AgentDashboard({ user }) {
     setExpandedRows(newExpanded);
   };
 
-  // Get activity timeline for a specific visit
+  // Get complete activity timeline for a visit
   const getVisitActivity = (visit) => {
-    const property = properties.find(p => p.property_id === visit.property_id);
-    return [
-      {
-        action: 'Visit request created',
-        timestamp: visit.created_at,
-        stage: 'new'
-      },
-      {
-        action: `Stage updated to: ${visit.stage}`,
-        timestamp: visit.updated_at,
-        stage: visit.stage
-      }
-    ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  };
+    return visit.activity_log || [];
 
   return (
     <div className="min-h-screen bg-background">
