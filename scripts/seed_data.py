@@ -320,19 +320,19 @@ async def seed_database():
             "updated_at": datetime.now(timezone.utc).isoformat()
         },
         {
-            \"visit_id\": f\"visit_{uuid.uuid4().hex[:12]}\",
-            \"property_id\": properties[3][\"property_id\"],
-            \"user_id\": tenant1_id,
-            \"user_name\": \"Jessica Williams\",
-            \"user_email\": \"tenant1@rental.com\",
-            \"user_phone\": \"+1-555-0301\",
-            \"status\": \"pending\",
-            \"stage\": \"visit_scheduled\",
-            \"assigned_agent_id\": agent2_id,
-            \"notes\": \"Very interested in luxury properties\",
-            \"preferred_date\": (datetime.now(timezone.utc) + timedelta(days=5)).isoformat(),
-            \"created_at\": (datetime.now(timezone.utc) - timedelta(days=2)).isoformat(),
-            \"updated_at\": datetime.now(timezone.utc).isoformat()
+            "visit_id": f"visit_{uuid.uuid4().hex[:12]}",
+            "property_id": properties[3]["property_id"],
+            "user_id": tenant1_id,
+            "user_name": "Jessica Williams",
+            "user_email": "tenant1@rental.com",
+            "user_phone": "+1-555-0301",
+            "status": "pending",
+            "stage": "visit_scheduled",
+            "assigned_agent_id": agent2_id,
+            "notes": "Very interested in luxury properties",
+            "preferred_date": (datetime.now(timezone.utc) + timedelta(days=5)).isoformat(),
+            "created_at": (datetime.now(timezone.utc) - timedelta(days=2)).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }
     ]
     
