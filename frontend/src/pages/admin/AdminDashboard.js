@@ -266,7 +266,7 @@ function AdminDashboard({ user }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {agents.map((agent) => (
+                {filteredAgents.map((agent) => (
                   <TableRow key={agent.user_id}>
                     <TableCell className="font-medium">{agent.name}</TableCell>
                     <TableCell>{agent.email}</TableCell>
@@ -275,6 +275,62 @@ function AdminDashboard({ user }) {
                 ))}
               </TableBody>
             </Table>
+            {filteredAgents.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No agents found
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="agent-view" className="space-y-6">
+            {agents.map((agent) => {
+              const agentVisits = visits.filter(v => v.assigned_agent_id === agent.user_id);
+              return (
+                <div key={agent.user_id} className="bg-card rounded-xl border p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold">{agent.name}</h3>
+                      <p className="text-sm text-muted-foreground">{agent.email}</p>
+                    </div>
+                    <Badge variant="secondary">{agentVisits.length} Assigned</Badge>
+                  </div>
+                  
+                  {agentVisits.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Property</TableHead>
+                          <TableHead>User</TableHead>
+                          <TableHead>Stage</TableHead>
+                          <TableHead>Requested On</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {agentVisits.map((visit) => {
+                          const property = properties.find(p => p.property_id === visit.property_id);
+                          return (
+                            <TableRow key={visit.visit_id}>
+                              <TableCell className="font-medium">{property?.title}</TableCell>
+                              <TableCell>{visit.user_name}</TableCell>
+                              <TableCell>
+                                <Badge variant={visit.stage === 'new' ? 'default' : 'secondary'}>
+                                  {visit.stage}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{new Date(visit.created_at).toLocaleDateString()}</TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No visits assigned yet
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </TabsContent>
         </Tabs>
       </div>
