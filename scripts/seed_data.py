@@ -266,7 +266,7 @@ async def seed_database():
     await db.properties.insert_many(properties)
     print(f"Created {len(properties)} properties")
     
-    occupied_properties = [p for p in properties if p[\"status\"] == \"occupied\"]
+    occupied_properties = [p for p in properties if p["status"] == "occupied"]
     
     print("Creating rental records for occupied properties...")
     rental_records = []
