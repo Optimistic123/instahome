@@ -415,13 +415,44 @@ async def update_visit_request(visit_id: str, stage: Optional[str] = None, assig
     if current_user.role not in ["admin", "agent"]:
         raise HTTPException(status_code=403, detail="Unauthorized")
     
+    visit = await db.visit_requests.find_one({"visit_id": visit_id}, {"_id": 0})
+    if not visit:
+        raise HTTPException(status_code=404, detail="Visit request not found")
+    
     update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
-    if stage:
+    activity_log = visit.get("activity_log", [])
+    
+    if stage and stage != visit.get("stage"):
         update_data["stage"] = stage
-    if assigned_agent_id:
+        activity_log.append({
+            "action": f"Stage changed from '{visit.get('stage')}' to '{stage}'",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "actor": current_user.name,
+            "actor_role": current_user.role
+        })
+    
+    if assigned_agent_id and assigned_agent_id != visit.get("assigned_agent_id"):
+        agent = await db.users.find_one({"user_id": assigned_agent_id}, {"_id": 0})
         update_data["assigned_agent_id"] = assigned_agent_id
-    if notes:
+        activity_log.append({
+            "action": f"Assigned to agent: {agent.get('name') if agent else 'Unknown'}",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "actor": current_user.name,
+            "actor_role": current_user.role
+        })
+    
+    if notes is not None:
+        old_notes = visit.get("notes", "")
         update_data["notes"] = notes
+        if old_notes != notes:
+            activity_log.append({
+                "action": "Notes updated" if old_notes else "Notes added",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "actor": current_user.name,
+                "actor_role": current_user.role
+            })
+    
+    update_data["activity_log"] = activity_log
     
     result = await db.visit_requests.update_one(
         {"visit_id": visit_id},
