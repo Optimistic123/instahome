@@ -91,46 +91,106 @@ function AgentDashboard({ user }) {
           <p className="text-muted-foreground">Manage your assigned property visits</p>
         </div>
 
-        <div className="bg-card rounded-xl border p-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Property</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Stage</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {visits.map((visit) => {
-                const property = properties.find(p => p.property_id === visit.property_id);
-                return (
-                  <TableRow key={visit.visit_id}>
-                    <TableCell className="font-medium">{property?.title}</TableCell>
-                    <TableCell>{visit.user_name}</TableCell>
-                    <TableCell>{visit.user_phone}</TableCell>
-                    <TableCell>
-                      <Badge>{visit.stage}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Select onValueChange={(value) => updateStage(visit.visit_id, value)}>
-                        <SelectTrigger className="w-40">
-                          <SelectValue placeholder="Update Stage" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="talked">Talked</SelectItem>
-                          <SelectItem value="visit_scheduled">Visit Scheduled</SelectItem>
-                          <SelectItem value="visit_completed">Visit Completed</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
+        <Tabs defaultValue="visits" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="visits">My Visits</TabsTrigger>
+            <TabsTrigger value="timeline">Activity Timeline</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="visits" className="space-y-4">
+            <div className="flex items-center justify-end">
+              <Select value={stageFilter} onValueChange={setStageFilter}>
+                <SelectTrigger className="w-48" data-testid="stage-filter">
+                  <SelectValue placeholder="All Stages" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Stages</SelectItem>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="talked">Talked</SelectItem>
+                  <SelectItem value="visit_scheduled">Visit Scheduled</SelectItem>
+                  <SelectItem value="visit_completed">Visit Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="bg-card rounded-xl border p-6">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Property</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Stage</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+                </TableHeader>
+                <TableBody>
+                  {filteredVisits.map((visit) => {
+                    const property = properties.find(p => p.property_id === visit.property_id);
+                    return (
+                      <TableRow key={visit.visit_id}>
+                        <TableCell className="font-medium">{property?.title}</TableCell>
+                        <TableCell>{visit.user_name}</TableCell>
+                        <TableCell>{visit.user_phone}</TableCell>
+                        <TableCell>
+                          <Badge>{visit.stage}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Select onValueChange={(value) => updateStage(visit.visit_id, value)}>
+                            <SelectTrigger className="w-40">
+                              <SelectValue placeholder="Update Stage" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="talked">Talked</SelectItem>
+                              <SelectItem value="visit_scheduled">Visit Scheduled</SelectItem>
+                              <SelectItem value="visit_completed">Visit Completed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+              {filteredVisits.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No visits found for this stage
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="timeline" className="bg-card rounded-xl border p-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-6">
+                <Clock className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">Recent Activity</h3>
+              </div>
+              {activityTimeline.map((activity, index) => (
+                <div key={index} className="flex gap-4 pb-4 border-b last:border-b-0">
+                  <div className="flex-shrink-0 w-2 h-2 rounded-full bg-primary mt-2"></div>
+                  <div className="flex-1">
+                    <p className="font-medium">{activity.property}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {activity.action} - {activity.user_name}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(activity.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                  <Badge variant={activity.stage === 'new' ? 'default' : 'secondary'} className="self-start">
+                    {activity.stage}
+                  </Badge>
+                </div>
+              ))}
+              {activityTimeline.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No recent activity
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
