@@ -1,0 +1,179 @@
+{
+  "identity": {
+    "persona": "E1",
+    "mission": "Create a vibrant, trustworthy, and modern rental property management system that breaks the boring 'corporate real estate' mold.",
+    "principles": [
+      "Fusion over Imitation: Mix architectural precision with lifestyle warmth.",
+      "Emotion First: Every screen should feel like a 'Welcome Home' moment.",
+      "Content is King: High-quality property imagery takes center stage.",
+      "Zoom In: Use bold close-ups of textures and details.",
+      "Negative Space: Luxurious spacing to create a premium feel."
+    ]
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Outfit, sans-serif",
+      "weights": ["500", "700"],
+      "usage": "All headings (h1-h6), hero text, and major stats.",
+      "letter_spacing": "tracking-tight"
+    },
+    "body": {
+      "font_family": "DM Sans, sans-serif",
+      "weights": ["400", "500"],
+      "usage": "Paragraphs, labels, inputs, and table data.",
+      "line_height": "leading-relaxed"
+    },
+    "mono": {
+      "font_family": "JetBrains Mono, monospace",
+      "usage": "IDs, API keys, and technical data in admin dashboard."
+    }
+  },
+  "colors": {
+    "palette_name": "Modern Pop Real Estate",
+    "mode": "Light Mode First (with Dark Mode support)",
+    "base": {
+      "background": "#FFFFFF",
+      "foreground": "#0F172A",
+      "card": "#FFFFFF",
+      "card_foreground": "#0F172A",
+      "popover": "#FFFFFF",
+      "popover_foreground": "#0F172A",
+      "muted": "#F1F5F9",
+      "muted_foreground": "#64748B",
+      "border": "#E2E8F0"
+    },
+    "brand": {
+      "primary": "#4F46E5",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#F8FAFC",
+      "secondary_foreground": "#0F172A",
+      "accent": "#84CC16",
+      "accent_foreground": "#FFFFFF",
+      "destructive": "#EF4444",
+      "destructive_foreground": "#FFFFFF"
+    },
+    "chart": {
+      "1": "#4F46E5",
+      "2": "#84CC16",
+      "3": "#06B6D4",
+      "4": "#F59E0B",
+      "5": "#EC4899"
+    },
+    "rules": [
+      "Do not use generic full-screen gradients.",
+      "Use 'Electric Indigo' (#4F46E5) for primary actions (Book Visit, Login).",
+      "Use 'Lime Green' (#84CC16) for positive states (Available, Income Up).",
+      "Use 'Slate' (#0F172A) for high-contrast text.",
+      "Backgrounds should be stark white or very subtle off-white (#F8FAFC) to let images pop."
+    ]
+  },
+  "visual_enhancers": {
+    "radius": "0.75rem",
+    "shadows": {
+      "card": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+      "hover": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05)",
+      "dropdown": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+    },
+    "glassmorphism": {
+      "usage": "Sticky headers, floating action bars, and modal overlays.",
+      "classes": "bg-white/80 backdrop-blur-xl border-b border-white/20"
+    },
+    "borders": {
+      "usage": "Subtle 1px borders on cards and inputs.",
+      "color": "border-slate-200"
+    }
+  },
+  "layout_strategies": {
+    "marketing_listings": {
+      "type": "Bento Grid",
+      "grid_cols": "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+      "gap": "gap-8",
+      "card_style": "Clean, image-first cards with minimal text overlay."
+    },
+    "dashboard": {
+      "type": "Control Room Grid",
+      "grid_cols": "grid-cols-1 md:grid-cols-4",
+      "gap": "gap-6",
+      "widgets": "Dense, data-rich cards with clear hierarchy."
+    },
+    "visit_workflow": {
+      "type": "Step-by-Step Wizard",
+      "layout": "Centered container with progress indicator.",
+      "spacing": "p-8 md:p-12"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 rounded-full font-medium transition-all hover:scale-[1.02]",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80 h-11 px-8 rounded-full font-medium",
+      "ghost": "hover:bg-accent hover:text-accent-foreground h-11 px-4 rounded-full"
+    },
+    "cards": {
+      "listing": "group relative overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-lg hover:-translate-y-1",
+      "dashboard": "rounded-xl border bg-card text-card-foreground shadow-sm p-6"
+    },
+    "inputs": {
+      "style": "h-11 rounded-lg border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    }
+  },
+  "image_urls": {
+    "property_interiors": [
+      {
+        "url": "https://images.unsplash.com/photo-1663756915301-2ba688e078cf?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBhcGFydG1lbnQlMjBpbnRlcmlvciUyMGxpdmluZyUyMHJvb218ZW58MHx8fHwxNzY3MjU2NjEyfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Bright modern living room with large window",
+        "category": "interior"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1642976975710-1d8890dbf5ab?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHw0fHxtb2Rlcm4lMjBhcGFydG1lbnQlMjBpbnRlcmlvciUyMGxpdmluZyUyMHJvb218ZW58MHx8fHwxNzY3MjU2NjEyfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Luxury living room with chandelier",
+        "category": "interior"
+      },
+      {
+        "url": "https://images.pexels.com/photos/6603475/pexels-photo-6603475.jpeg",
+        "description": "Cozy minimalist interior",
+        "category": "interior"
+      }
+    ],
+    "property_exteriors": [
+      {
+        "url": "https://images.unsplash.com/photo-1746458258536-b9ee5db20a73?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBtb2Rlcm4lMjBob3VzZSUyMGV4dGVyaW9yJTIwYXJjaGl0ZWN0dXJlfGVufDB8fHx8MTc2NzI1NjYxM3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Hillside luxury modern house",
+        "category": "exterior"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1766603636562-531bb3e1dda8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxsdXh1cnklMjBtb2Rlcm4lMjBob3VzZSUyMGV4dGVyaW9yJTIwYXJjaGl0ZWN0dXJlfGVufDB8fHx8MTc2NzI1NjYxM3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Modern house with wooden facade",
+        "category": "exterior"
+      },
+      {
+        "url": "https://images.pexels.com/photos/3034343/pexels-photo-3034343.jpeg",
+        "description": "Contemporary architecture exterior",
+        "category": "exterior"
+      }
+    ],
+    "agents": [
+      {
+        "url": "https://images.unsplash.com/photo-1738750908048-14200459c3c9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzd8MHwxfHNlYXJjaHwzfHxwcm9mZXNzaW9uYWwlMjByZWFsJTIwZXN0YXRlJTIwYWdlbnQlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjcyNTY2MTR8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Male agent in suit",
+        "category": "agent"
+      },
+      {
+        "url": "https://images.pexels.com/photos/8815915/pexels-photo-8815915.jpeg",
+        "description": "Professional agent portrait",
+        "category": "agent"
+      }
+    ]
+  },
+  "universal_guidelines": [
+    "Use 'sonner' for all toast notifications.",
+    "All interactive elements MUST have a 'data-testid' attribute.",
+    "Do not use gradients on text; it reduces readability.",
+    "Ensure all images have 'alt' tags for accessibility.",
+    "Use 'lucide-react' for icons.",
+    "Do not use 'Inter' font for headings; use 'Outfit'.",
+    "Maintain 2-3x more spacing than typical designs (e.g., p-8 instead of p-4).",
+    "Use 'framer-motion' for smooth transitions between states.",
+    "Never use transparent backgrounds for dropdowns or overlays without a blur/scrim."
+  ],
+  "instructions_to_main_agent": "You are building a Rental Property Management System. Use the provided colors, typography, and image URLs to create a high-end, trustworthy, and vibrant platform. Focus on the 'Tenant' experience for the landing/listing pages (make it visual) and the 'Owner/Admin' experience for dashboards (make it data-dense but clean). Implement the 'Visit Request' workflow with a clear step-by-step UI."
+}
