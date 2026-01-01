@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../App';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Building2, LogOut, DollarSign, Home } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Building2, LogOut, DollarSign, Home, X, Search } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
 function OwnerDashboard({ user }) {
   const navigate = useNavigate();
   const [dashboard, setDashboard] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [paymentFilter, setPaymentFilter] = useState('all');
 
   useEffect(() => {
     fetchDashboard();
