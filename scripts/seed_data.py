@@ -271,7 +271,8 @@ async def seed_database():
     print("Creating rental records for occupied properties...")
     rental_records = []
     for prop in occupied_properties:
-        rental_records.append({\n            \"rental_id\": f\"rental_{uuid.uuid4().hex[:12]}\",
+        rental_records.append({
+            "rental_id": f"rental_{uuid.uuid4().hex[:12]}",
             \"property_id\": prop[\"property_id\"],
             \"tenant_id\": tenant1_id,
             \"start_date\": datetime.now(timezone.utc).isoformat(),
