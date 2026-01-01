@@ -65,6 +65,24 @@ function AdminDashboard({ user }) {
     }
   };
 
+  // Filter data based on search term
+  const filteredVisits = visits.filter(visit => {
+    const property = properties.find(p => p.property_id === visit.property_id);
+    return visit.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           visit.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           property?.title.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+  });
+
+  const filteredProperties = properties.filter(property =>
+    property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    property.city.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredAgents = agents.filter(agent =>
+    agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    agent.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <header className="glass-effect sticky top-0 z-50 border-b">
