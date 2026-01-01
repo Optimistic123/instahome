@@ -133,12 +133,25 @@ function AdminDashboard({ user }) {
           </div>
         </div>
 
-        <Tabs defaultValue="visits" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="visits">Visit Requests</TabsTrigger>
-            <TabsTrigger value="properties">Properties</TabsTrigger>
-            <TabsTrigger value="agents">Agents</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="visits" className="space-y-6" onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between">
+            <TabsList>
+              <TabsTrigger value="visits">Visit Requests</TabsTrigger>
+              <TabsTrigger value="properties">Properties</TabsTrigger>
+              <TabsTrigger value="agents">Agents</TabsTrigger>
+              <TabsTrigger value="agent-view">Agent View</TabsTrigger>
+            </TabsList>
+            <div className="relative w-72">
+              <Input
+                placeholder={`Search ${activeTab}...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+                data-testid="admin-search-input"
+              />
+              <Eye className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            </div>
+          </div>
 
           <TabsContent value="visits" className="bg-card rounded-xl border p-6">
             <Table>
