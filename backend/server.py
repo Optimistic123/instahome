@@ -393,7 +393,15 @@ async def create_visit_request(visit_data: VisitRequestCreate, current_user: Use
         "notes": visit_data.notes,
         "preferred_date": visit_data.preferred_date,
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat()
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "activity_log": [
+            {
+                "action": "Visit request created",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "actor": current_user.name,
+                "actor_role": current_user.role
+            }
+        ]
     }
     
     await db.visit_requests.insert_one(visit_doc)
