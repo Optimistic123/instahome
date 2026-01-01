@@ -53,6 +53,29 @@ function AgentDashboard({ user }) {
     navigate('/login');
   };
 
+  const saveNotes = async (visitId) => {
+    try {
+      await api.patch(`/visit-requests/${visitId}`, null, { 
+        params: { notes: notesText[visitId] || '' } 
+      });
+      toast.success('Notes saved successfully');
+      setEditingNotes({ ...editingNotes, [visitId]: false });
+      fetchVisits();
+    } catch (error) {
+      toast.error('Failed to save notes');
+    }
+  };
+
+  const startEditingNotes = (visitId, currentNotes) => {
+    setNotesText({ ...notesText, [visitId]: currentNotes || '' });
+    setEditingNotes({ ...editingNotes, [visitId]: true });
+  };
+
+  const cancelEditingNotes = (visitId) => {
+    setEditingNotes({ ...editingNotes, [visitId]: false });
+    setNotesText({ ...notesText, [visitId]: visits.find(v => v.visit_id === visitId)?.notes || '' });
+  };
+
   // Filter visits by stage
   const filteredVisits = stageFilter === 'all' 
     ? visits 
