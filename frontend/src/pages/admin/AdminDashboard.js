@@ -299,7 +299,7 @@ function AdminDashboard({ user }) {
           </TabsContent>
 
           <TabsContent value="agent-view" className="space-y-6">
-            {agents.map((agent) => {
+            {filteredAgentsForView.map((agent) => {
               const agentVisits = visits.filter(v => v.assigned_agent_id === agent.user_id);
               return (
                 <div key={agent.user_id} className="bg-card rounded-xl border p-6">
@@ -347,6 +347,11 @@ function AdminDashboard({ user }) {
                 </div>
               );
             })}
+            {filteredAgentsForView.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No agents found
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
