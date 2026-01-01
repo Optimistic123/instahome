@@ -14,10 +14,9 @@ function PropertyDetailPage() {
   const navigate = useNavigate();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [visitData, setVisitData] = useState({ phone: '', preferred_date: '', notes: '' });
+  const [visitData, setVisitData] = useState({ name: '', phone: '', preferred_date: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showVisitForm, setShowVisitForm] = useState(false);
 
   useEffect(() => {
     fetchProperty();
