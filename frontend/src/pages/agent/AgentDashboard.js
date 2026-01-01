@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../App';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, LogOut, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Building2, LogOut, Clock, ChevronDown, ChevronUp, Save } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -15,6 +17,8 @@ function AgentDashboard({ user }) {
   const [properties, setProperties] = useState([]);
   const [stageFilter, setStageFilter] = useState('all');
   const [expandedRows, setExpandedRows] = useState(new Set());
+  const [editingNotes, setEditingNotes] = useState({});
+  const [notesText, setNotesText] = useState({});
 
   useEffect(() => {
     fetchVisits();
