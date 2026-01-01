@@ -153,91 +153,87 @@ function PropertyDetailPage() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
-              <div className="bg-card p-8 rounded-2xl border shadow-sm">
-                <div>
-                  <p className="text-sm text-muted-foreground">Monthly Rent</p>
-                  <p className="text-4xl font-bold text-primary" data-testid="rent-amount">
-                    ${property.rent_amount.toLocaleString()}
-                  </p>
-                </div>
+            <div className="sticky top-24 bg-card p-8 rounded-2xl border shadow-sm space-y-6">
+              <div>
+                <p className="text-sm text-muted-foreground">Monthly Rent</p>
+                <p className="text-4xl font-bold text-primary" data-testid="rent-amount">
+                  ${property.rent_amount.toLocaleString()}
+                </p>
+              </div>
 
-                <div className="pt-4 border-t mt-6 space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Security Deposit</span>
-                    <span className="font-medium">${property.deposit_amount.toLocaleString()}</span>
-                  </div>
+              <div className="pt-4 border-t space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Security Deposit</span>
+                  <span className="font-medium">${property.deposit_amount.toLocaleString()}</span>
                 </div>
               </div>
 
-              <div className="bg-card rounded-2xl border shadow-sm overflow-hidden">
-                <button
-                  onClick={() => setShowVisitForm(!showVisitForm)}
-                  className="w-full p-6 flex items-center justify-between hover:bg-muted/50 transition-colors"
-                  data-testid="toggle-visit-form"
-                >
-                  <div className="text-left">
-                    <h3 className="text-lg font-semibold mb-1">Request a Visit</h3>
-                    <p className="text-sm text-muted-foreground">Schedule a property viewing</p>
-                  </div>
-                  {showVisitForm ? (
-                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                  )}
-                </button>
-
-                {showVisitForm && (
-                  <div className="p-6 pt-0 border-t animate-fade-in">
-                    <form onSubmit={handleVisitRequest} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          placeholder="+1-555-1234"
-                          value={visitData.phone}
-                          onChange={(e) => setVisitData({ ...visitData, phone: e.target.value })}
-                          data-testid="phone-input"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="preferred_date">Preferred Date</Label>
-                        <Input
-                          id="preferred_date"
-                          type="date"
-                          value={visitData.preferred_date}
-                          onChange={(e) => setVisitData({ ...visitData, preferred_date: e.target.value })}
-                          data-testid="date-input"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="notes">Additional Notes</Label>
-                        <Textarea
-                          id="notes"
-                          placeholder="Any special requests or questions..."
-                          value={visitData.notes}
-                          onChange={(e) => setVisitData({ ...visitData, notes: e.target.value })}
-                          data-testid="notes-input"
-                          rows={3}
-                        />
-                      </div>
-                      <Button 
-                        type="submit" 
-                        disabled={submitting} 
-                        className="w-full rounded-full h-12" 
-                        data-testid="submit-visit-request"
-                      >
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="w-full h-12 rounded-full text-base" data-testid="request-visit-button">
+                    Request a Visit
+                  </Button>
+                </DialogTrigger>
+                <DialogContent data-testid="visit-request-dialog">
+                  <DialogHeader>
+                    <DialogTitle>Request Property Visit</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleVisitRequest} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input
+                        id="name"
+                        type="text"
+                        placeholder="John Doe"
+                        value={visitData.name}
+                        onChange={(e) => setVisitData({ ...visitData, name: e.target.value })}
+                        required
+                        data-testid="name-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="+1-555-1234"
+                        value={visitData.phone}
+                        onChange={(e) => setVisitData({ ...visitData, phone: e.target.value })}
+                        data-testid="phone-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="preferred_date">Preferred Date</Label>
+                      <Input
+                        id="preferred_date"
+                        type="date"
+                        value={visitData.preferred_date}
+                        onChange={(e) => setVisitData({ ...visitData, preferred_date: e.target.value })}
+                        data-testid="date-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="notes">Additional Notes</Label>
+                      <Textarea
+                        id="notes"
+                        placeholder="Any special requests or questions..."
+                        value={visitData.notes}
+                        onChange={(e) => setVisitData({ ...visitData, notes: e.target.value })}
+                        data-testid="notes-input"
+                      />
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit" disabled={submitting} className="w-full rounded-full" data-testid="submit-visit-request">
                         {submitting ? 'Submitting...' : 'Submit Request'}
                       </Button>
-                    </form>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
 
-                    <p className="text-xs text-muted-foreground text-center mt-4">
-                      Our team will contact you within 24 hours to schedule your visit
-                    </p>
-                  </div>
-                )}
-              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                Our team will contact you within 24 hours to schedule your visit
+              </p>
             </div>
           </div>
         </div>
