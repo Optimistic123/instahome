@@ -337,7 +337,7 @@ async def seed_database():
     ]
     
     await db.visit_requests.insert_many(visit_requests)
-    print(f\"Created {len(visit_requests)} visit requests\")
+    print(f"Created {len(visit_requests)} visit requests")
     
     print(\"\\n✅ Database seeded successfully!\")
     print(f\"Total users: {len(users)}\")
