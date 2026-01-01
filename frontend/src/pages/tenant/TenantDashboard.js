@@ -48,6 +48,17 @@ function TenantDashboard({ user }) {
     navigate('/login');
   };
 
+  const archiveVisit = (visitId) => {
+    const visit = visits.find(v => v.visit_id === visitId);
+    if (visit) {
+      setArchivedVisits([...archivedVisits, { ...visit, archived_at: new Date().toISOString() }]);
+      setVisits(visits.filter(v => v.visit_id !== visitId));
+      toast.success('Visit archived successfully');
+    }
+  };
+
+  const activeVisits = visits;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="glass-effect sticky top-0 z-50 border-b">
