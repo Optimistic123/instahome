@@ -2,15 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../App';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Building2, LogOut, Eye } from 'lucide-react';
+import { Building2, LogOut, Eye, Archive, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 function TenantDashboard({ user }) {
   const navigate = useNavigate();
   const [visits, setVisits] = useState([]);
   const [properties, setProperties] = useState([]);
+  const [archivedVisits, setArchivedVisits] = useState([]);
 
   useEffect(() => {
     fetchVisits();
