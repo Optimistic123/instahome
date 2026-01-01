@@ -305,19 +305,19 @@ async def seed_database():
             "updated_at": datetime.now(timezone.utc).isoformat()
         },
         {
-            \"visit_id\": f\"visit_{uuid.uuid4().hex[:12]}\",
-            \"property_id\": properties[1][\"property_id\"],
-            \"user_id\": tenant2_id,
-            \"user_name\": \"Robert Martinez\",
-            \"user_email\": \"tenant2@rental.com\",
-            \"user_phone\": \"+1-555-0302\",
-            \"status\": \"pending\",
-            \"stage\": \"new\",
-            \"assigned_agent_id\": None,
-            \"notes\": \"Looking for family home\",
-            \"preferred_date\": None,
-            \"created_at\": datetime.now(timezone.utc).isoformat(),
-            \"updated_at\": datetime.now(timezone.utc).isoformat()
+            "visit_id": f"visit_{uuid.uuid4().hex[:12]}",
+            "property_id": properties[1]["property_id"],
+            "user_id": tenant2_id,
+            "user_name": "Robert Martinez",
+            "user_email": "tenant2@rental.com",
+            "user_phone": "+1-555-0302",
+            "status": "pending",
+            "stage": "new",
+            "assigned_agent_id": None,
+            "notes": "Looking for family home",
+            "preferred_date": None,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
         },
         {
             \"visit_id\": f\"visit_{uuid.uuid4().hex[:12]}\",
