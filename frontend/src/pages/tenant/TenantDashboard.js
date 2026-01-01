@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../App';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Building2, LogOut, Eye, Archive, X } from 'lucide-react';
+import { Building2, LogOut, Eye, Archive } from 'lucide-react';
 import { toast } from 'sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';

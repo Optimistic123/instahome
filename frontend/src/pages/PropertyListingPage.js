@@ -4,7 +4,7 @@ import { api } from '../App';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, MapPin, Search, Filter } from 'lucide-react';
+import { Building2, MapPin, Search } from 'lucide-react';
 
 function PropertyListingPage() {
   const [properties, setProperties] = useState([]);

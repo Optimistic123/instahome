@@ -9,10 +9,24 @@ echo ""
 echo "Checking MongoDB installation..."
 if ! command -v mongosh &> /dev/null
 then
-    echo "❌ MongoDB is not installed!"
-    echo "Please install MongoDB from: https://www.mongodb.com/try/download/community"
-    echo "Or use MongoDB Atlas: https://www.mongodb.com/cloud/atlas"
-    exit 1
+    echo "⚠️  MongoDB is not installed. Installing via Homebrew..."
+    
+    # Check if Homebrew is installed
+    if ! command -v brew &> /dev/null
+    then
+        echo "❌ Homebrew is not installed!"
+        echo "Please install Homebrew first: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+        exit 1
+    fi
+    
+    # Install MongoDB via Homebrew
+    brew tap mongodb/brew
+    brew install mongodb-community
+    
+    # Start MongoDB service
+    brew services start mongodb-community
+    
+    echo "✅ MongoDB installed and started"
 else
     echo "✅ MongoDB is installed"
 fi
@@ -71,6 +85,14 @@ source venv/bin/activate
 echo "Installing backend dependencies..."
 pip install -r requirements.txt
 
+# Ensure uvicorn is installed
+if ! command -v uvicorn &> /dev/null
+then
+    echo "⚠️  uvicorn not found. Installing explicitly..."
+    pip install uvicorn
+fi
+echo "✅ uvicorn is installed"
+
 # Create .env file if it doesn't exist
 if [ ! -f ".env" ]; then
     echo "Creating backend .env file..."
@@ -118,21 +140,35 @@ echo "================================================"
 echo ""
 echo "To start the application:"
 echo ""
-echo "1. Start Backend (in one terminal):"
+echo "================================================"
+echo "Backend Setup (Terminal 1):"
+echo "================================================"
 echo "   cd backend"
+echo "   python -m venv venv"
 echo "   source venv/bin/activate"
+echo "   pip install -r requirements.txt"
+echo "   cp .env.example .env"
+echo "   python ../scripts/seed_data.py"
 echo "   uvicorn server:app --host 0.0.0.0 --port 8001 --reload"
 echo ""
-echo "2. Start Frontend (in another terminal):"
+echo "================================================"
+echo "Frontend Setup (Terminal 2):"
+echo "================================================"
 echo "   cd frontend"
+echo "   yarn install"
+echo "   cp .env.example .env"
 echo "   yarn start"
 echo ""
-echo "3. Access the application:"
+echo "================================================"
+echo "Access the Application:"
+echo "================================================"
 echo "   Frontend: http://localhost:3000"
 echo "   Backend API: http://localhost:8001"
 echo "   API Docs: http://localhost:8001/docs"
 echo ""
+echo "================================================"
 echo "Demo Credentials:"
+echo "================================================"
 echo "   Admin: admin@rental.com / password123"
 echo "   Agent: agent1@rental.com / password123"
 echo "   Owner: owner1@rental.com / password123"
