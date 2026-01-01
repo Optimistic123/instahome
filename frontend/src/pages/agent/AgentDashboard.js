@@ -54,18 +54,33 @@ function AgentDashboard({ user }) {
     ? visits 
     : visits.filter(v => v.stage === stageFilter);
 
-  // Create activity timeline
-  const activityTimeline = visits
-    .map(visit => ({
-      visit_id: visit.visit_id,
-      property: properties.find(p => p.property_id === visit.property_id)?.title || 'Unknown Property',
-      user_name: visit.user_name,
-      action: `Stage updated to: ${visit.stage}`,
-      timestamp: visit.updated_at,
-      stage: visit.stage
-    }))
-    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-    .slice(0, 10);
+  // Toggle row expansion
+  const toggleRow = (visitId) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(visitId)) {
+      newExpanded.delete(visitId);
+    } else {
+      newExpanded.add(visitId);
+    }
+    setExpandedRows(newExpanded);
+  };
+
+  // Get activity timeline for a specific visit
+  const getVisitActivity = (visit) => {
+    const property = properties.find(p => p.property_id === visit.property_id);
+    return [
+      {
+        action: 'Visit request created',
+        timestamp: visit.created_at,
+        stage: 'new'
+      },
+      {
+        action: `Stage updated to: ${visit.stage}`,
+        timestamp: visit.updated_at,
+        stage: visit.stage
+      }
+    ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  };
 
   return (
     <div className="min-h-screen bg-background">
