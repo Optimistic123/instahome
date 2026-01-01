@@ -39,9 +39,15 @@ function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-8 bg-muted/30">
       <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight">Create Account</h2>
-          <p className="text-muted-foreground mt-2">Join our rental platform today</p>
+        <div>
+          <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6" data-testid="back-to-home">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Link>
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight">Create Account</h2>
+            <p className="text-muted-foreground mt-2">Join our rental platform today</p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6 bg-card p-8 rounded-2xl border shadow-sm" data-testid="register-form">
