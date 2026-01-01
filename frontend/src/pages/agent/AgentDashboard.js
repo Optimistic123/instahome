@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../App';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Building2, LogOut } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Building2, LogOut, Clock } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
 function AgentDashboard({ user }) {
   const navigate = useNavigate();
   const [visits, setVisits] = useState([]);
   const [properties, setProperties] = useState([]);
+  const [stageFilter, setStageFilter] = useState('all');
 
   useEffect(() => {
     fetchVisits();
