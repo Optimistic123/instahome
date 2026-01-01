@@ -199,11 +199,15 @@ function AgentDashboard({ user }) {
                                 variant="ghost" 
                                 size="sm"
                                 data-testid={`view-activity-${visit.visit_id}`}
+                                onClick={() => {
+                                  setNotesText({ ...notesText, [visit.visit_id]: visit.notes || '' });
+                                  setEditingNotes({ ...editingNotes, [visit.visit_id]: false });
+                                }}
                               >
                                 <Clock className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
+                            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                               <DialogHeader>
                                 <DialogTitle>Activity Timeline - {property?.title}</DialogTitle>
                               </DialogHeader>
@@ -215,26 +219,74 @@ function AgentDashboard({ user }) {
                                     <p className="text-muted-foreground">{visit.user_phone}</p>
                                   </div>
                                 </div>
-                                {activities.map((activity, index) => (
-                                  <div key={index} className="flex gap-4 pb-4 border-b last:border-b-0">
-                                    <div className="flex-shrink-0 w-2 h-2 rounded-full bg-primary mt-2"></div>
-                                    <div className="flex-1">
-                                      <p className="font-medium">{activity.action}</p>
-                                      <p className="text-xs text-muted-foreground mt-1">
-                                        {new Date(activity.timestamp).toLocaleString()}
-                                      </p>
+                                
+                                <div className="mb-4">
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                    <Clock className="h-4 w-4" />
+                                    Complete Activity History
+                                  </h4>
+                                  <div className="space-y-3">
+                                    {activities.map((activity, index) => (
+                                      <div key={index} className="flex gap-4 pb-3 border-b last:border-b-0">
+                                        <div className="flex-shrink-0 w-2 h-2 rounded-full bg-primary mt-2"></div>
+                                        <div className="flex-1">
+                                          <p className="font-medium">{activity.action}</p>
+                                          <p className="text-xs text-muted-foreground mt-1">
+                                            {new Date(activity.timestamp).toLocaleString()} • by {activity.actor} ({activity.actor_role})
+                                          </p>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <p className="text-sm font-medium">Notes:</p>
+                                    {!editingNotes[visit.visit_id] && (
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm"
+                                        onClick={() => startEditingNotes(visit.visit_id, visit.notes)}
+                                        data-testid={`edit-notes-${visit.visit_id}`}
+                                      >
+                                        Edit
+                                      </Button>
+                                    )}
+                                  </div>
+                                  {editingNotes[visit.visit_id] ? (
+                                    <div className="space-y-2">
+                                      <Textarea
+                                        value={notesText[visit.visit_id] || ''}
+                                        onChange={(e) => setNotesText({ ...notesText, [visit.visit_id]: e.target.value })}
+                                        placeholder="Add notes about this visit..."
+                                        rows={4}
+                                        data-testid={`notes-textarea-${visit.visit_id}`}
+                                      />
+                                      <div className="flex gap-2">
+                                        <Button 
+                                          size="sm" 
+                                          onClick={() => saveNotes(visit.visit_id)}
+                                          data-testid={`save-notes-${visit.visit_id}`}
+                                        >
+                                          <Save className="h-4 w-4 mr-2" />
+                                          Save
+                                        </Button>
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline"
+                                          onClick={() => cancelEditingNotes(visit.visit_id)}
+                                        >
+                                          Cancel
+                                        </Button>
+                                      </div>
                                     </div>
-                                    <Badge variant={activity.stage === 'new' ? 'default' : 'secondary'} className="self-start">
-                                      {activity.stage}
-                                    </Badge>
-                                  </div>
-                                ))}
-                                {visit.notes && (
-                                  <div className="mt-4 p-3 bg-muted/30 rounded-lg">
-                                    <p className="text-sm font-medium mb-1">Notes:</p>
-                                    <p className="text-sm text-muted-foreground">{visit.notes}</p>
-                                  </div>
-                                )}
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                      {visit.notes || 'No notes added yet'}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
                             </DialogContent>
                           </Dialog>
