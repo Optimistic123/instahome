@@ -75,9 +75,15 @@ function LoginPage() {
 
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight">Sign In</h2>
-            <p className="text-muted-foreground mt-2">Enter your credentials to continue</p>
+          <div>
+            <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6" data-testid="back-to-home">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Link>
+            <div className="text-center">
+              <h2 className="text-3xl font-bold tracking-tight">Sign In</h2>
+              <p className="text-muted-foreground mt-2">Enter your credentials to continue</p>
+            </div>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6" data-testid="login-form">
