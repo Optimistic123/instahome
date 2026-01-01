@@ -216,9 +216,19 @@ function AdminDashboard({ user }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {properties.map((property) => (
+                {filteredProperties.map((property) => (
                   <TableRow key={property.property_id}>
-                    <TableCell className="font-medium">{property.title}</TableCell>
+                    <TableCell className="font-medium">
+                      <a
+                        href={`/properties/${property.property_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                        data-testid={`property-link-${property.property_id}`}
+                      >
+                        {property.title}
+                      </a>
+                    </TableCell>
                     <TableCell>{property.city}</TableCell>
                     <TableCell>${property.rent_amount.toLocaleString()}</TableCell>
                     <TableCell>
@@ -239,6 +249,11 @@ function AdminDashboard({ user }) {
                 ))}
               </TableBody>
             </Table>
+            {filteredProperties.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No properties found
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="agents" className="bg-card rounded-xl border p-6">
