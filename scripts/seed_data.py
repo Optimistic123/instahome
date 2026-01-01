@@ -273,14 +273,14 @@ async def seed_database():
     for prop in occupied_properties:
         rental_records.append({
             "rental_id": f"rental_{uuid.uuid4().hex[:12]}",
-            \"property_id\": prop[\"property_id\"],
-            \"tenant_id\": tenant1_id,
-            \"start_date\": datetime.now(timezone.utc).isoformat(),
-            \"monthly_rent\": prop[\"rent_amount\"],
-            \"payment_status\": \"paid\",
-            \"last_payment_date\": datetime.now(timezone.utc).isoformat(),
-            \"next_payment_due\": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
-            \"created_at\": datetime.now(timezone.utc).isoformat()
+            "property_id": prop["property_id"],
+            "tenant_id": tenant1_id,
+            "start_date": datetime.now(timezone.utc).isoformat(),
+            "monthly_rent": prop["rent_amount"],
+            "payment_status": "paid",
+            "last_payment_date": datetime.now(timezone.utc).isoformat(),
+            "next_payment_due": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat()
         })
     
     if rental_records:
