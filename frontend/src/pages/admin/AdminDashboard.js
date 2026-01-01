@@ -153,10 +153,19 @@ function AdminDashboard({ user }) {
                 placeholder={`Search ${activeTab}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 pr-10"
                 data-testid="admin-search-input"
               />
               <Eye className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  data-testid="clear-search-button"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
 
