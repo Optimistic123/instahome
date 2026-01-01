@@ -14,6 +14,8 @@ function AdminDashboard({ user }) {
   const [properties, setProperties] = useState([]);
   const [visits, setVisits] = useState([]);
   const [agents, setAgents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('visits');
 
   useEffect(() => {
     fetchData();
