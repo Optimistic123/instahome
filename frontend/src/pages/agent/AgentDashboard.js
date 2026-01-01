@@ -95,6 +95,7 @@ function AgentDashboard({ user }) {
   // Get complete activity timeline for a visit
   const getVisitActivity = (visit) => {
     return visit.activity_log || [];
+  };
 
   return (
     <div className="min-h-screen bg-background">
