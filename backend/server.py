@@ -28,8 +28,6 @@ JWT_SECRET = os.environ.get('JWT_SECRET', 'your-secret-key-change-this')
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_DAYS = 7
 
-emerge_client = EmergeClient()
-
 class User(BaseModel):
     user_id: str
     email: EmailStr
