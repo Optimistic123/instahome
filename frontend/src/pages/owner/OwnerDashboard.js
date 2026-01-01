@@ -38,6 +38,13 @@ function OwnerDashboard({ user }) {
     </div>;
   }
 
+  // Filter properties
+  const filteredProperties = dashboard.property_earnings.filter(property => {
+    const matchesSearch = property.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesPayment = paymentFilter === 'all' || property.payment_status === paymentFilter;
+    return matchesSearch && matchesPayment;
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <header className="glass-effect sticky top-0 z-50 border-b">
