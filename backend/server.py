@@ -96,6 +96,7 @@ class VisitRequest(BaseModel):
     notes: Optional[str] = None
     created_at: str
     updated_at: str
+    activity_log: Optional[List[dict]] = []
 
 class VisitRequestCreate(BaseModel):
     property_id: str
