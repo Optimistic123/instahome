@@ -165,7 +165,7 @@ function AdminDashboard({ user }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visits.map((visit) => {
+                {filteredVisits.map((visit) => {
                   const property = properties.find(p => p.property_id === visit.property_id);
                   const agent = agents.find(a => a.user_id === visit.assigned_agent_id);
                   return (
@@ -197,6 +197,11 @@ function AdminDashboard({ user }) {
                 })}
               </TableBody>
             </Table>
+            {filteredVisits.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No visit requests found
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="properties" className="bg-card rounded-xl border p-6">
