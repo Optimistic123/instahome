@@ -57,6 +57,7 @@ function PropertyDetailPage() {
       await api.post('/visit-requests', { ...visitData, property_id: id });
       toast.success('Visit request submitted successfully!');
       setVisitData({ phone: '', preferred_date: '', notes: '' });
+      setShowVisitForm(false);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to submit request');
     } finally {
