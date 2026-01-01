@@ -347,5 +347,5 @@ async def seed_database():
     
     client.close()
 
-if __name__ == \"__main__\":
+if __name__ == "__main__":
     asyncio.run(seed_database())
