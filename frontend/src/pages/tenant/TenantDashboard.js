@@ -87,47 +87,143 @@ function TenantDashboard({ user }) {
           <p className="text-muted-foreground">Track your property visit requests</p>
         </div>
 
-        <div className="bg-card rounded-xl border p-6">
-          {visits.length === 0 ? (
-            <div className="text-center py-12">
-              <Eye className="h-16 w-16 mx-auto text-muted-foreground mb-4 opacity-20" />
-              <p className="text-muted-foreground mb-4">No visit requests yet</p>
-              <Button asChild className="rounded-full">
-                <Link to="/properties">Browse Properties</Link>
-              </Button>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Property</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Stage</TableHead>
-                  <TableHead>Requested On</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {visits.map((visit) => {
-                  const property = properties.find(p => p.property_id === visit.property_id);
-                  return (
-                    <TableRow key={visit.visit_id}>
-                      <TableCell className="font-medium">{property?.title}</TableCell>
-                      <TableCell>{property?.city}, {property?.state}</TableCell>
-                      <TableCell>
-                        <Badge>{visit.status}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{visit.stage}</Badge>
-                      </TableCell>
-                      <TableCell>{new Date(visit.created_at).toLocaleDateString()}</TableCell>
+        <Tabs defaultValue="active" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="active">Active Requests</TabsTrigger>
+            <TabsTrigger value="archived">Archived</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="active">
+            <div className="bg-card rounded-xl border p-6">
+              {activeVisits.length === 0 ? (
+                <div className="text-center py-12">
+                  <Eye className="h-16 w-16 mx-auto text-muted-foreground mb-4 opacity-20" />
+                  <p className="text-muted-foreground mb-4">No active visit requests</p>
+                  <Button asChild className="rounded-full">
+                    <Link to="/properties">Browse Properties</Link>
+                  </Button>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Property</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Stage</TableHead>
+                      <TableHead>Requested On</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </div>
+                  </TableHeader>
+                  <TableBody>
+                    {activeVisits.map((visit) => {
+                      const property = properties.find(p => p.property_id === visit.property_id);
+                      return (
+                        <TableRow key={visit.visit_id}>
+                          <TableCell className="font-medium">
+                            <a
+                              href={`/properties/${visit.property_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                              data-testid={`property-link-${visit.property_id}`}
+                            >
+                              {property?.title}
+                            </a>
+                          </TableCell>
+                          <TableCell>{property?.city}, {property?.state}</TableCell>
+                          <TableCell>
+                            <Badge>{visit.status}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{visit.stage}</Badge>
+                          </TableCell>
+                          <TableCell>{new Date(visit.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  data-testid={`archive-visit-${visit.visit_id}`}
+                                >
+                                  <Archive className="h-4 w-4 mr-2" />
+                                  Archive
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Archive Visit Request?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will move the visit request to your archived list. You can view it later in the Archived tab.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => archiveVisit(visit.visit_id)}>
+                                    Archive
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="archived">
+            <div className="bg-card rounded-xl border p-6">
+              {archivedVisits.length === 0 ? (
+                <div className="text-center py-12">
+                  <Archive className="h-16 w-16 mx-auto text-muted-foreground mb-4 opacity-20" />
+                  <p className="text-muted-foreground">No archived requests</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Property</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Stage</TableHead>
+                      <TableHead>Requested On</TableHead>
+                      <TableHead>Archived On</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {archivedVisits.map((visit) => {
+                      const property = properties.find(p => p.property_id === visit.property_id);
+                      return (
+                        <TableRow key={visit.visit_id}>
+                          <TableCell className="font-medium">
+                            <a
+                              href={`/properties/${visit.property_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              {property?.title}
+                            </a>
+                          </TableCell>
+                          <TableCell>{property?.city}, {property?.state}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{visit.stage}</Badge>
+                          </TableCell>
+                          <TableCell>{new Date(visit.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>{new Date(visit.archived_at).toLocaleDateString()}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
