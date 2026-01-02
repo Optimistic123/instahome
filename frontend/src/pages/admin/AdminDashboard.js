@@ -560,15 +560,15 @@ function AdminDashboard({ user }) {
         </div>
 
         <Tabs defaultValue="visits" className="space-y-6" onValueChange={setActiveTab}>
-          <div className="flex items-center justify-between">
-            <TabsList>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <TabsList className="flex flex-wrap gap-1 w-full sm:w-auto">
               <TabsTrigger value="visits">Visit Requests</TabsTrigger>
               <TabsTrigger value="properties">Properties</TabsTrigger>
               <TabsTrigger value="owners">Owners</TabsTrigger>
               <TabsTrigger value="agents">Agents</TabsTrigger>
               <TabsTrigger value="agent-view">Agent View</TabsTrigger>
             </TabsList>
-            <div className="relative w-72">
+            <div className="relative w-full sm:w-72 flex-shrink-0">
               <Input
                 placeholder={`Search ${activeTab}...`}
                 value={searchTerm}
