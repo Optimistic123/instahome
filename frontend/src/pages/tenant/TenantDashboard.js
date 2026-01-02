@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { safeArray, safeApiCall, safeMap } from '../../utils/apiHelpers';
+import TenantDashboardShimmer from '../../components/shimmer/TenantDashboardShimmer';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,6 +74,10 @@ function TenantDashboard({ user }) {
   };
 
   const activeVisits = visits;
+
+  if (loading) {
+    return <TenantDashboardShimmer />;
+  }
 
   return (
     <div className="min-h-screen bg-background">

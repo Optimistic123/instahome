@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Building2, LogOut, DollarSign, Home, X, Search } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import OwnerDashboardShimmer from '../../components/shimmer/OwnerDashboardShimmer';
 
 function OwnerDashboard({ user }) {
   const navigate = useNavigate();
@@ -33,9 +34,7 @@ function OwnerDashboard({ user }) {
   };
 
   if (!dashboard) {
-    return <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-    </div>;
+    return <OwnerDashboardShimmer />;
   }
 
   // Filter properties

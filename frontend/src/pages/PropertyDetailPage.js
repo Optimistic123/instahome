@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { MapPin, Bed, Bath, Square, CheckCircle2, ArrowLeft } from 'lucide-react';
 import CustomIcon from '@/components/CustomIcon';
 import { toast } from 'sonner';
-import { safeObject, safeArray, safeApiCall, safeGet } from '../utils/apiHelpers';
+import { safeObject, safeArray, safeApiCall } from '../utils/apiHelpers';
+import PropertyDetailShimmer from '../components/shimmer/PropertyDetailShimmer';
 
 function PropertyDetailPage() {
   const { id } = useParams();
@@ -79,11 +80,7 @@ function PropertyDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <PropertyDetailShimmer />;
   }
 
   return (

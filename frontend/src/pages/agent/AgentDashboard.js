@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import AgentDashboardShimmer from '../../components/shimmer/AgentDashboardShimmer';
 
 function AgentDashboard({ user }) {
   const navigate = useNavigate();
@@ -18,12 +19,14 @@ function AgentDashboard({ user }) {
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [editingNotes, setEditingNotes] = useState({});
   const [notesText, setNotesText] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchVisits();
   }, []);
 
   const fetchVisits = async () => {
+    setLoading(true);
     try {
       const response = await api.get('/visit-requests');
       setVisits(response.data);
@@ -34,6 +37,8 @@ function AgentDashboard({ user }) {
       setProperties(propResponses.filter(r => r).map(r => r.data));
     } catch (error) {
       console.error('Error fetching visits:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,6 +100,10 @@ function AgentDashboard({ user }) {
   const getVisitActivity = (visit) => {
     return visit.activity_log || [];
   };
+
+  if (loading) {
+    return <AgentDashboardShimmer />;
+  }
 
   return (
     <div className="min-h-screen bg-background">

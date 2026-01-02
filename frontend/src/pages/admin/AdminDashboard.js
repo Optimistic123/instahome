@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { safeArray } from '../../utils/apiHelpers';
+import AdminDashboardShimmer from '../../components/shimmer/AdminDashboardShimmer';
 
 function AdminDashboard({ user }) {
   const navigate = useNavigate();
@@ -496,14 +497,7 @@ function AdminDashboard({ user }) {
   );
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading dashboard data...</p>
-        </div>
-      </div>
-    );
+    return <AdminDashboardShimmer />;
   }
 
   return (
