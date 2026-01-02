@@ -13,12 +13,26 @@ from datetime import datetime, timezone, timedelta
 import bcrypt
 import jwt
 import httpx
+import asyncio
+from pymongo.errors import ServerSelectionTimeoutError, ConnectionFailure
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
+# Configure MongoDB client with aggressive timeouts to fail fast
+# Note: mongodb+srv:// URLs automatically use TLS/SSL, so we don't need to set tls=True
+client = AsyncIOMotorClient(
+    mongo_url,
+    serverSelectionTimeoutMS=5000,  # 5 second timeout - fail fast
+    connectTimeoutMS=5000,  # 5 second connection timeout
+    socketTimeoutMS=10000,  # 10 second socket timeout
+    retryWrites=True,
+    maxPoolSize=10,
+    minPoolSize=1,
+    maxIdleTimeMS=45000,
+    # Don't set tls=True for mongodb+srv:// URLs as they already handle SSL automatically
+)
 
 # Validate DB_NAME - MongoDB doesn't allow periods, spaces, or certain special characters
 db_name = os.environ.get('DB_NAME', '')
@@ -177,6 +191,46 @@ class RentalRecordCreate(BaseModel):
 @api_router.get("/")
 async def root():
     return {"message": "Rental Property Management API"}
+
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint to verify database connection"""
+    try:
+        # Test database connection with timeout
+        await asyncio.wait_for(
+            client.admin.command('ping'),
+            timeout=3.0
+        )
+        # Test if we can access the database
+        db_list = await client.list_database_names()
+        db_exists = db_name in db_list
+        
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "database_name": db_name,
+            "database_exists": db_exists,
+            "available_databases": len(db_list)
+        }
+    except asyncio.TimeoutError:
+        return {
+            "status": "unhealthy",
+            "database": "timeout",
+            "error": "Database connection timed out after 3 seconds"
+        }
+    except (ServerSelectionTimeoutError, ConnectionFailure) as e:
+        return {
+            "status": "unhealthy",
+            "database": "connection_failed",
+            "error": f"MongoDB connection failed: {str(e)}"
+        }
+    except Exception as e:
+        logger.error(f"Health check error: {str(e)}", exc_info=True)
+        return {
+            "status": "unhealthy",
+            "database": "error",
+            "error": str(e)
+        }
 
 async def get_current_user(authorization: Optional[str] = Header(None), session_token: Optional[str] = Cookie(None)):
     token = None
@@ -356,23 +410,65 @@ async def logout(response: Response, session_token: Optional[str] = Cookie(None)
 
 @api_router.get("/properties", response_model=List[Property])
 async def get_properties(status: Optional[str] = None, city: Optional[str] = None, property_type: Optional[str] = None):
-    query = {}
-    if status:
-        query["status"] = status
-    if city:
-        query["city"] = city
-    if property_type:
-        query["property_type"] = property_type
-    
-    properties = await db.properties.find(query, {"_id": 0}).to_list(1000)
-    return properties
+    try:
+        # First, verify database connection is alive
+        try:
+            await asyncio.wait_for(
+                client.admin.command('ping'),
+                timeout=2.0
+            )
+        except asyncio.TimeoutError:
+            logger.error("Database ping timed out")
+            raise HTTPException(
+                status_code=503,
+                detail="Database connection timeout. Check MongoDB Atlas IP whitelist includes Railway IPs."
+            )
+        except (ServerSelectionTimeoutError, ConnectionFailure) as e:
+            logger.error(f"MongoDB connection failed: {str(e)}")
+            raise HTTPException(
+                status_code=503,
+                detail="Database connection failed. Verify MONGO_URL and MongoDB Atlas IP whitelist."
+            )
+        
+        # Now perform the query with timeout
+        query = {}
+        if status:
+            query["status"] = status
+        if city:
+            query["city"] = city
+        if property_type:
+            query["property_type"] = property_type
+        
+        try:
+            properties = await asyncio.wait_for(
+                db.properties.find(query, {"_id": 0}).to_list(1000),
+                timeout=3.0
+            )
+            return properties
+        except asyncio.TimeoutError:
+            logger.error("Database query timed out")
+            raise HTTPException(
+                status_code=503,
+                detail="Database query timeout."
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching properties: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch properties: {str(e)}")
 
 @api_router.get("/properties/{property_id}", response_model=Property)
 async def get_property(property_id: str):
-    property_doc = await db.properties.find_one({"property_id": property_id}, {"_id": 0})
-    if not property_doc:
-        raise HTTPException(status_code=404, detail="Property not found")
-    return property_doc
+    try:
+        property_doc = await db.properties.find_one({"property_id": property_id}, {"_id": 0})
+        if not property_doc:
+            raise HTTPException(status_code=404, detail="Property not found")
+        return property_doc
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching property {property_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch property: {str(e)}")
 
 @api_router.post("/properties", response_model=Property)
 async def create_property(property_data: PropertyCreate, current_user: User = Depends(get_current_user)):
@@ -1038,6 +1134,15 @@ async def get_all_rentals(current_user: User = Depends(get_current_user)):
 
 app.include_router(api_router)
 
+# Global exception handler for unhandled errors
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal server error: {str(exc)}"}
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -1051,6 +1156,18 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+@app.on_event("startup")
+async def startup_db_client():
+    try:
+        # Test database connection (non-blocking - don't crash app if it fails)
+        await client.admin.command('ping')
+        logger.info(f"✅ Database connection successful. Using database: {db_name}")
+    except Exception as e:
+        # Log error but don't crash - allow app to start and handle errors gracefully
+        logger.error(f"⚠️  Database connection failed on startup: {str(e)}")
+        logger.warning("App will continue to start. Database operations may fail until connection is established.")
+        # Don't raise - let the app start and handle errors in individual endpoints
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
