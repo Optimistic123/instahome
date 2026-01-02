@@ -94,6 +94,16 @@
 │ • Update     │              │              │                                │
 │   property   │              │              │                                │
 │   status     │              │              │                                │
+│ ─────────────│              │              │                                │
+│ ONBOARDING:  │              │              │                                │
+│ • Create new │              │              │                                │
+│   owners     │              │              │                                │
+│ • Create new │              │              │                                │
+│   properties │              │              │                                │
+│   (linked to │              │              │                                │
+│   owners)    │              │              │                                │
+│ • View owner │              │              │                                │
+│   stats      │              │              │                                │
 └──────────────┴──────────────┴──────────────┴────────────────────────────────┘
 ```
 
@@ -155,6 +165,210 @@
     │  Admin  │ │  Agent  │ │  Owner  │ │ Tenant  │
     │Dashboard│ │Dashboard│ │Dashboard│ │Dashboard│
     └─────────┘ └─────────┘ └─────────┘ └─────────┘
+```
+
+---
+
+## 🏢 Owner & Property Onboarding Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    OWNER & PROPERTY ONBOARDING (Admin-Driven)               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                              ADMIN DASHBOARD
+                                    │
+                    ┌───────────────┴───────────────┐
+                    │                               │
+                    ▼                               ▼
+        ┌───────────────────┐           ┌───────────────────┐
+        │   OWNERS TAB      │           │  PROPERTIES TAB   │
+        │                   │           │                   │
+        │  [Add New Owner]  │           │ [Add New Property]│
+        └─────────┬─────────┘           └─────────┬─────────┘
+                  │                               │
+                  ▼                               │
+        ┌───────────────────┐                     │
+        │  Owner Creation   │                     │
+        │     Modal         │                     │
+        ├───────────────────┤                     │
+        │ • Name *          │                     │
+        │ • Email *         │                     │
+        │ • Phone           │                     │
+        │ • Address         │                     │
+        └─────────┬─────────┘                     │
+                  │                               │
+                  ▼                               │
+        ┌───────────────────┐                     │
+        │  POST /api/admin/ │                     │
+        │      owners       │                     │
+        ├───────────────────┤                     │
+        │ • Generate temp   │                     │
+        │   password        │                     │
+        │ • Create user     │                     │
+        │   with role=owner │                     │
+        │ • Return creds    │                     │
+        └─────────┬─────────┘                     │
+                  │                               │
+                  ▼                               │
+        ┌───────────────────┐                     │
+        │  Success Modal    │                     │
+        │ ┌───────────────┐ │                     │
+        │ │ Temp Password │ │                     │
+        │ │  [abc123xyz]  │ │                     │
+        │ └───────────────┘ │                     │
+        │ Share with owner  │                     │
+        └─────────┬─────────┘                     │
+                  │                               │
+                  │     ┌─────────────────────────┘
+                  │     │
+                  ▼     ▼
+        ┌───────────────────────────────────────────┐
+        │         Property Creation Modal           │
+        ├───────────────────────────────────────────┤
+        │                                           │
+        │  ┌─────────────────────────────────────┐  │
+        │  │  👤 SELECT OWNER * (Required)       │  │
+        │  │  ┌─────────────────────────────┐    │  │
+        │  │  │ Sarah Johnson               ▼│   │  │
+        │  │  │ Michael Chen                 │   │  │
+        │  │  └─────────────────────────────┘    │  │
+        │  └─────────────────────────────────────┘  │
+        │                                           │
+        │  Property Details:                        │
+        │  • Title, Description                     │
+        │  • Type (Apartment/House/etc)             │
+        │  • Address, City, State                   │
+        │  • Rent Amount, Deposit                   │
+        │  • Bedrooms, Bathrooms, Area              │
+        │                                           │
+        │           [Create Property]               │
+        └───────────────────┬───────────────────────┘
+                            │
+                            ▼
+        ┌───────────────────────────────────────────┐
+        │      POST /api/properties                 │
+        ├───────────────────────────────────────────┤
+        │ • Validate owner_id exists                │
+        │ • Create property linked to owner         │
+        │ • Status = "available"                    │
+        └───────────────────┬───────────────────────┘
+                            │
+                            ▼
+        ┌───────────────────────────────────────────┐
+        │  ✅ Property Created Successfully         │
+        │                                           │
+        │  Property visible on:                     │
+        │  • Landing Page                           │
+        │  • Property Listing Page                  │
+        │  • Owner Dashboard (for the owner)        │
+        │  • Admin Dashboard (Properties tab)       │
+        └───────────────────────────────────────────┘
+```
+
+### Onboarding Summary
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         STEP-BY-STEP ONBOARDING                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  STEP 1: Admin Creates Owner                                                │
+│  ────────────────────────────                                                │
+│  Admin Dashboard → Owners Tab → "Add New Owner"                             │
+│  • Enter owner details (name, email, phone, address)                        │
+│  • System generates temporary password                                       │
+│  • Admin shares credentials with owner                                       │
+│                                                                              │
+│  STEP 2: Admin Creates Property                                             │
+│  ───────────────────────────────                                             │
+│  Admin Dashboard → Properties Tab → "Add New Property"                      │
+│  • Select owner from dropdown (REQUIRED)                                    │
+│  • Enter property details                                                   │
+│  • Property is created and linked to owner                                  │
+│                                                                              │
+│  STEP 3: Owner Can Login                                                    │
+│  ────────────────────────────                                                │
+│  • Owner uses shared credentials to login                                   │
+│  • Owner Dashboard shows their properties                                   │
+│  • Owner can track earnings and payment status                              │
+│                                                                              │
+│  STEP 4: Property Goes Live                                                 │
+│  ───────────────────────────                                                 │
+│  • Property appears on public listing pages                                 │
+│  • Tenants can browse and request visits                                    │
+│  • Admin assigns agents to handle visit requests                            │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  ✅ Agent Creation: Admin → Agents Tab → "Add New Agent"           │    │
+│  │     Same flow as Owner creation (temp password generated)          │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 👔 Agent Onboarding Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         AGENT ONBOARDING (Admin-Driven)                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                              ADMIN DASHBOARD
+                                    │
+                                    ▼
+                        ┌───────────────────┐
+                        │    AGENTS TAB     │
+                        │                   │
+                        │  [Add New Agent]  │
+                        └─────────┬─────────┘
+                                  │
+                                  ▼
+                        ┌───────────────────┐
+                        │  Agent Creation   │
+                        │     Modal         │
+                        ├───────────────────┤
+                        │ • Name *          │
+                        │ • Email *         │
+                        │ • Phone           │
+                        │ • Specialization  │
+                        │   - Residential   │
+                        │   - Commercial    │
+                        │   - Luxury        │
+                        │   - Student       │
+                        │   - Family Homes  │
+                        └─────────┬─────────┘
+                                  │
+                                  ▼
+                        ┌───────────────────┐
+                        │   POST /api/      │
+                        │     agents        │
+                        ├───────────────────┤
+                        │ • Generate temp   │
+                        │   password        │
+                        │ • Create user     │
+                        │   with role=agent │
+                        │ • Return creds    │
+                        └─────────┬─────────┘
+                                  │
+                                  ▼
+                        ┌───────────────────┐
+                        │  Success Modal    │
+                        │ ┌───────────────┐ │
+                        │ │ Temp Password │ │
+                        │ │  [abc123xyz]  │ │
+                        │ └───────────────┘ │
+                        │ Share with agent  │
+                        └─────────┬─────────┘
+                                  │
+                                  ▼
+                        ┌───────────────────┐
+                        │  Agent Can Login  │
+                        │  & View Assigned  │
+                        │     Visits        │
+                        └───────────────────┘
 ```
 
 ---
@@ -245,9 +459,10 @@
 │ password (hashed)   │       │ description         │
 │ role                │       │ property_type       │
 │ phone               │       │ address, city, state│
-│ picture             │       │ rent_amount         │
-│ created_at          │       │ deposit_amount      │
-└─────────────────────┘       │ bedrooms, bathrooms │
+│ address (for owners)│       │ rent_amount         │
+│ picture             │       │ deposit_amount      │
+│ created_at          │       │ bedrooms, bathrooms │
+└─────────────────────┘       │
          │                    │ area_sqft           │
          │                    │ amenities[]         │
          │                    │ images[]            │
@@ -283,7 +498,13 @@
                               ├─────────────────────┤
                               │ rental_id (PK)      │
                               │ property_id (FK)    │
-                              │ tenant_id (FK)      │
+                              │ primary_tenant_id   │
+                              │ co_tenants[] {      │
+                              │   user_id, name,    │
+                              │   email, phone,     │
+                              │   relationship,     │
+                              │   rent_share        │
+                              │ }                   │
                               │ start_date          │
                               │ monthly_rent        │
                               │ payment_status      │
@@ -323,9 +544,17 @@
 │                                                                              │
 │  AGENTS                                                                      │
 │  ├── GET    /api/agents             → List all agents (admin only)          │
-│  └── POST   /api/agents             → Create agent (admin only)             │
+│  ├── POST   /api/agents             → Create agent (temp password)          │
+│  ├── GET    /api/agents/:id         → Get agent with assigned visits        │
+│  └── DELETE /api/agents/:id         → Delete agent (if no active visits)    │
 │                                                                              │
-│  OWNER                                                                       │
+│  OWNERS (Admin)                                                              │
+│  ├── GET    /api/admin/owners       → List all owners with stats            │
+│  ├── POST   /api/admin/owners       → Create new owner account              │
+│  ├── GET    /api/admin/owners/:id   → Get owner details with properties     │
+│  └── DELETE /api/admin/owners/:id   → Delete owner (if no properties)       │
+│                                                                              │
+│  OWNER DASHBOARD                                                             │
 │  └── GET    /api/owner/dashboard    → Get owner's property stats            │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘

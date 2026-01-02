@@ -54,6 +54,7 @@ async def seed_database():
             "password": hashed_password,
             "role": "owner",
             "phone": "+1-555-0101",
+            "address": "450 Sunset Boulevard, San Francisco, CA 94101",
             "picture": "https://images.pexels.com/photos/8815915/pexels-photo-8815915.jpeg?w=150",
             "created_at": datetime.now(timezone.utc).isoformat()
         },
@@ -64,6 +65,7 @@ async def seed_database():
             "password": hashed_password,
             "role": "owner",
             "phone": "+1-555-0102",
+            "address": "789 Tech Park Drive, Seattle, WA 98101",
             "picture": "https://images.unsplash.com/photo-1738750908048-14200459c3c9?w=150",
             "created_at": datetime.now(timezone.utc).isoformat()
         },
@@ -74,6 +76,7 @@ async def seed_database():
             "password": hashed_password,
             "role": "agent",
             "phone": "+1-555-0201",
+            "specialization": "Residential",
             "picture": "https://images.pexels.com/photos/8815915/pexels-photo-8815915.jpeg?w=150",
             "created_at": datetime.now(timezone.utc).isoformat()
         },
@@ -84,6 +87,7 @@ async def seed_database():
             "password": hashed_password,
             "role": "agent",
             "phone": "+1-555-0202",
+            "specialization": "Luxury",
             "picture": "https://images.unsplash.com/photo-1738750908048-14200459c3c9?w=150",
             "created_at": datetime.now(timezone.utc).isoformat()
         },
@@ -270,17 +274,52 @@ async def seed_database():
     
     print("Creating rental records for occupied properties...")
     rental_records = []
-    for prop in occupied_properties:
+    
+    # First occupied property - single tenant (Jessica Williams)
+    if len(occupied_properties) > 0:
         rental_records.append({
             "rental_id": f"rental_{uuid.uuid4().hex[:12]}",
-            "property_id": prop["property_id"],
-            "tenant_id": tenant1_id,
+            "property_id": occupied_properties[0]["property_id"],
+            "primary_tenant_id": tenant1_id,
+            "co_tenants": [],  # Single occupant
             "start_date": datetime.now(timezone.utc).isoformat(),
-            "monthly_rent": prop["rent_amount"],
+            "monthly_rent": occupied_properties[0]["rent_amount"],
             "payment_status": "paid",
             "last_payment_date": datetime.now(timezone.utc).isoformat(),
             "next_payment_due": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
             "created_at": datetime.now(timezone.utc).isoformat()
+        })
+    
+    # Second occupied property - multiple tenants (Robert Martinez + co-tenants)
+    if len(occupied_properties) > 1:
+        rental_records.append({
+            "rental_id": f"rental_{uuid.uuid4().hex[:12]}",
+            "property_id": occupied_properties[1]["property_id"],
+            "primary_tenant_id": tenant2_id,
+            "co_tenants": [
+                {
+                    "user_id": None,  # No account
+                    "name": "Emily Martinez",
+                    "email": "emily.martinez@email.com",
+                    "phone": "+1-555-0401",
+                    "relationship": "spouse",
+                    "rent_share": None  # Shared equally
+                },
+                {
+                    "user_id": None,
+                    "name": "Alex Thompson",
+                    "email": "alex.thompson@email.com",
+                    "phone": "+1-555-0402",
+                    "relationship": "roommate",
+                    "rent_share": 1000.00  # Pays $1000 of the rent
+                }
+            ],
+            "start_date": datetime.now(timezone.utc).isoformat(),
+            "monthly_rent": occupied_properties[1]["rent_amount"],
+            "payment_status": "pending",
+            "last_payment_date": (datetime.now(timezone.utc) - timedelta(days=25)).isoformat(),
+            "next_payment_due": (datetime.now(timezone.utc) + timedelta(days=5)).isoformat(),
+            "created_at": (datetime.now(timezone.utc) - timedelta(days=60)).isoformat()
         })
     
     if rental_records:

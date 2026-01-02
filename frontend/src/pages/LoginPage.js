@@ -10,8 +10,8 @@ import { Mail, Lock, Chrome, ArrowLeft } from 'lucide-react';
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@rental.com');
+  const [password, setPassword] = useState('password123');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {

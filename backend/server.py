@@ -35,7 +35,18 @@ class User(BaseModel):
     role: str
     picture: Optional[str] = None
     phone: Optional[str] = None
+    address: Optional[str] = None
     created_at: str
+
+class OwnerWithStats(BaseModel):
+    user_id: str
+    email: EmailStr
+    name: str
+    role: str
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    created_at: str
+    property_count: int = 0
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -47,6 +58,28 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class OwnerCreate(BaseModel):
+    email: EmailStr
+    name: str
+    phone: Optional[str] = None
+    address: Optional[str] = None
+
+class AgentCreate(BaseModel):
+    email: EmailStr
+    name: str
+    phone: Optional[str] = None
+    specialization: Optional[str] = None  # e.g., "Residential", "Commercial", "Luxury"
+
+class AgentUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    specialization: Optional[str] = None
+
+class OwnerUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
 
 class Property(BaseModel):
     property_id: str
@@ -104,16 +137,31 @@ class VisitRequestCreate(BaseModel):
     preferred_date: Optional[str] = None
     notes: Optional[str] = None
 
+class CoTenant(BaseModel):
+    user_id: Optional[str] = None  # Optional - may not have account
+    name: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    relationship: str = "roommate"  # roommate, spouse, family, friend, other
+    rent_share: Optional[float] = None  # Their portion of rent
+
 class RentalRecord(BaseModel):
     rental_id: str
     property_id: str
-    tenant_id: str
+    primary_tenant_id: str  # Main leaseholder (must have account)
+    co_tenants: Optional[List[CoTenant]] = []  # Additional occupants
     start_date: str
     monthly_rent: float
     payment_status: str
     last_payment_date: Optional[str] = None
     next_payment_due: str
     created_at: str
+
+class RentalRecordCreate(BaseModel):
+    property_id: str
+    primary_tenant_id: str
+    co_tenants: Optional[List[CoTenant]] = []
+    monthly_rent: Optional[float] = None  # Override property rent if needed
 
 @api_router.get("/")
 async def root():
@@ -320,6 +368,11 @@ async def create_property(property_data: PropertyCreate, current_user: User = De
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can create properties")
     
+    # Validate that owner exists
+    owner = await db.users.find_one({"user_id": property_data.owner_id, "role": "owner"}, {"_id": 0})
+    if not owner:
+        raise HTTPException(status_code=400, detail="Invalid owner_id. Owner not found.")
+    
     property_id = f"prop_{uuid.uuid4().hex[:12]}"
     property_doc = {
         "property_id": property_id,
@@ -366,7 +419,8 @@ async def update_property_status(property_id: str, status: str, tenant_id: Optio
         rental_doc = {
             "rental_id": rental_id,
             "property_id": property_id,
-            "tenant_id": tenant_id,
+            "primary_tenant_id": tenant_id,
+            "co_tenants": [],  # Can be updated later via separate endpoint
             "start_date": datetime.now(timezone.utc).isoformat(),
             "monthly_rent": property_doc["rent_amount"],
             "payment_status": "pending",
@@ -377,6 +431,37 @@ async def update_property_status(property_id: str, status: str, tenant_id: Optio
         await db.rental_records.insert_one(rental_doc)
     
     return {"message": "Property status updated"}
+
+@api_router.delete("/properties/{property_id}")
+async def delete_property(property_id: str, current_user: User = Depends(get_current_user)):
+    """Delete a property (Admin only) - only if not occupied and has no active visits"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can delete properties")
+    
+    # Check if property exists
+    property_doc = await db.properties.find_one({"property_id": property_id}, {"_id": 0})
+    if not property_doc:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
+    # Check if property is occupied
+    if property_doc.get("status") == "occupied":
+        raise HTTPException(status_code=400, detail="Cannot delete occupied property. Change status first.")
+    
+    # Check if property has active visit requests
+    active_visits = await db.visit_requests.count_documents({
+        "property_id": property_id,
+        "stage": {"$nin": ["visit_completed", "cancelled"]}
+    })
+    if active_visits > 0:
+        raise HTTPException(status_code=400, detail=f"Cannot delete property with {active_visits} active visit request(s).")
+    
+    # Delete associated rental records (if any historical)
+    await db.rental_records.delete_many({"property_id": property_id})
+    
+    # Delete the property
+    await db.properties.delete_one({"property_id": property_id})
+    
+    return {"message": "Property deleted successfully"}
 
 @api_router.post("/visit-requests", response_model=VisitRequest)
 async def create_visit_request(visit_data: VisitRequestCreate, current_user: User = Depends(get_current_user)):
@@ -481,13 +566,275 @@ async def get_agents(current_user: User = Depends(get_current_user)):
     agents = await db.users.find({"role": "agent"}, {"_id": 0, "password": 0}).to_list(1000)
     return agents
 
-@api_router.post("/agents", response_model=User)
-async def create_agent(agent_data: UserCreate, current_user: User = Depends(get_current_user)):
+@api_router.post("/agents")
+async def create_agent(agent_data: AgentCreate, current_user: User = Depends(get_current_user)):
+    """Create a new agent account (Admin only) - generates temporary password"""
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Only admins can create agents")
     
-    agent_data.role = "agent"
-    return await register(agent_data)
+    # Check if email already exists
+    existing_user = await db.users.find_one({"email": agent_data.email}, {"_id": 0})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Generate a temporary password
+    import secrets
+    import string
+    temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+    
+    hashed_password = bcrypt.hashpw(temp_password.encode('utf-8'), bcrypt.gensalt())
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    
+    agent_doc = {
+        "user_id": user_id,
+        "email": agent_data.email,
+        "name": agent_data.name,
+        "password": hashed_password.decode('utf-8'),
+        "role": "agent",
+        "phone": agent_data.phone,
+        "specialization": agent_data.specialization,
+        "picture": None,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(agent_doc)
+    
+    # Remove password and _id from response (MongoDB adds _id which is not JSON serializable)
+    agent_doc.pop("password", None)
+    agent_doc.pop("_id", None)
+    
+    # Log the temporary password (in production, send via email)
+    logger.info(f"Created agent {agent_data.email} with temporary password: {temp_password}")
+    
+    # Return agent with temp password in response (for demo purposes)
+    return JSONResponse(content={
+        **agent_doc,
+        "temp_password": temp_password,
+        "message": "Agent created successfully. Please share the temporary password with the agent."
+    })
+
+@api_router.get("/agents/{agent_id}")
+async def get_agent_details(agent_id: str, current_user: User = Depends(get_current_user)):
+    """Get agent details with their assigned visits (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can view agent details")
+    
+    agent = await db.users.find_one({"user_id": agent_id, "role": "agent"}, {"_id": 0, "password": 0})
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    # Get agent's assigned visits
+    assigned_visits = await db.visit_requests.find({"assigned_agent_id": agent_id}, {"_id": 0}).to_list(1000)
+    
+    # Count visits by stage
+    visit_stats = {
+        "total": len(assigned_visits),
+        "new": len([v for v in assigned_visits if v.get("stage") == "new"]),
+        "talked": len([v for v in assigned_visits if v.get("stage") == "talked"]),
+        "visit_scheduled": len([v for v in assigned_visits if v.get("stage") == "visit_scheduled"]),
+        "visit_completed": len([v for v in assigned_visits if v.get("stage") == "visit_completed"])
+    }
+    
+    return {
+        **agent,
+        "assigned_visits": assigned_visits,
+        "visit_stats": visit_stats
+    }
+
+@api_router.delete("/agents/{agent_id}")
+async def delete_agent(agent_id: str, current_user: User = Depends(get_current_user)):
+    """Delete an agent (Admin only) - only if they have no active visits"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can delete agents")
+    
+    # Check if agent exists
+    agent = await db.users.find_one({"user_id": agent_id, "role": "agent"}, {"_id": 0})
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    # Check if agent has active (non-completed) visits
+    active_visits = await db.visit_requests.count_documents({
+        "assigned_agent_id": agent_id,
+        "stage": {"$ne": "visit_completed"}
+    })
+    
+    if active_visits > 0:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Cannot delete agent with {active_visits} active visit(s). Reassign visits first."
+        )
+    
+    # Delete agent
+    await db.users.delete_one({"user_id": agent_id})
+    await db.user_sessions.delete_many({"user_id": agent_id})
+    
+    return {"message": "Agent deleted successfully"}
+
+@api_router.patch("/agents/{agent_id}")
+async def update_agent(agent_id: str, agent_data: AgentUpdate, current_user: User = Depends(get_current_user)):
+    """Update an agent's details (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can update agents")
+    
+    # Check if agent exists
+    agent = await db.users.find_one({"user_id": agent_id, "role": "agent"}, {"_id": 0})
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    # Build update dict with only provided fields
+    update_data = {}
+    if agent_data.name is not None:
+        update_data["name"] = agent_data.name
+    if agent_data.phone is not None:
+        update_data["phone"] = agent_data.phone
+    if agent_data.specialization is not None:
+        update_data["specialization"] = agent_data.specialization
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    await db.users.update_one({"user_id": agent_id}, {"$set": update_data})
+    
+    # Return updated agent
+    updated_agent = await db.users.find_one({"user_id": agent_id}, {"_id": 0, "password": 0})
+    return updated_agent
+
+# ============== OWNER MANAGEMENT (Admin) ==============
+
+@api_router.get("/admin/owners", response_model=List[OwnerWithStats])
+async def get_all_owners(current_user: User = Depends(get_current_user)):
+    """Get all owners with their property counts (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can view owners")
+    
+    owners = await db.users.find({"role": "owner"}, {"_id": 0, "password": 0}).to_list(1000)
+    
+    # Add property count for each owner
+    owners_with_stats = []
+    for owner in owners:
+        property_count = await db.properties.count_documents({"owner_id": owner["user_id"]})
+        owners_with_stats.append({
+            **owner,
+            "property_count": property_count
+        })
+    
+    return owners_with_stats
+
+@api_router.post("/admin/owners", response_model=User)
+async def create_owner(owner_data: OwnerCreate, current_user: User = Depends(get_current_user)):
+    """Create a new owner account (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can create owners")
+    
+    # Check if email already exists
+    existing_user = await db.users.find_one({"email": owner_data.email}, {"_id": 0})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Generate a temporary password (owner can change later)
+    import secrets
+    import string
+    temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+    
+    hashed_password = bcrypt.hashpw(temp_password.encode('utf-8'), bcrypt.gensalt())
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    
+    owner_doc = {
+        "user_id": user_id,
+        "email": owner_data.email,
+        "name": owner_data.name,
+        "password": hashed_password.decode('utf-8'),
+        "role": "owner",
+        "phone": owner_data.phone,
+        "address": owner_data.address,
+        "picture": None,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(owner_doc)
+    
+    # Remove password and _id from response (MongoDB adds _id which is not JSON serializable)
+    owner_doc.pop("password", None)
+    owner_doc.pop("_id", None)
+    
+    # Log the temporary password (in production, send via email)
+    logger.info(f"Created owner {owner_data.email} with temporary password: {temp_password}")
+    
+    # Return owner with temp password in response (for demo purposes)
+    return JSONResponse(content={
+        **owner_doc,
+        "temp_password": temp_password,
+        "message": "Owner created successfully. Please share the temporary password with the owner."
+    })
+
+@api_router.get("/admin/owners/{owner_id}")
+async def get_owner_details(owner_id: str, current_user: User = Depends(get_current_user)):
+    """Get owner details with their properties (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can view owner details")
+    
+    owner = await db.users.find_one({"user_id": owner_id, "role": "owner"}, {"_id": 0, "password": 0})
+    if not owner:
+        raise HTTPException(status_code=404, detail="Owner not found")
+    
+    # Get owner's properties
+    properties = await db.properties.find({"owner_id": owner_id}, {"_id": 0}).to_list(1000)
+    
+    return {
+        **owner,
+        "properties": properties
+    }
+
+@api_router.delete("/admin/owners/{owner_id}")
+async def delete_owner(owner_id: str, current_user: User = Depends(get_current_user)):
+    """Delete an owner (Admin only) - only if they have no properties"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can delete owners")
+    
+    # Check if owner exists
+    owner = await db.users.find_one({"user_id": owner_id, "role": "owner"}, {"_id": 0})
+    if not owner:
+        raise HTTPException(status_code=404, detail="Owner not found")
+    
+    # Check if owner has properties
+    property_count = await db.properties.count_documents({"owner_id": owner_id})
+    if property_count > 0:
+        raise HTTPException(status_code=400, detail=f"Cannot delete owner with {property_count} properties. Reassign or delete properties first.")
+    
+    # Delete owner
+    await db.users.delete_one({"user_id": owner_id})
+    await db.user_sessions.delete_many({"user_id": owner_id})
+    
+    return {"message": "Owner deleted successfully"}
+
+@api_router.patch("/admin/owners/{owner_id}")
+async def update_owner(owner_id: str, owner_data: OwnerUpdate, current_user: User = Depends(get_current_user)):
+    """Update an owner's details (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can update owners")
+    
+    # Check if owner exists
+    owner = await db.users.find_one({"user_id": owner_id, "role": "owner"}, {"_id": 0})
+    if not owner:
+        raise HTTPException(status_code=404, detail="Owner not found")
+    
+    # Build update dict with only provided fields
+    update_data = {}
+    if owner_data.name is not None:
+        update_data["name"] = owner_data.name
+    if owner_data.phone is not None:
+        update_data["phone"] = owner_data.phone
+    if owner_data.address is not None:
+        update_data["address"] = owner_data.address
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    await db.users.update_one({"user_id": owner_id}, {"$set": update_data})
+    
+    # Return updated owner
+    updated_owner = await db.users.find_one({"user_id": owner_id}, {"_id": 0, "password": 0})
+    return updated_owner
 
 @api_router.get("/owner/dashboard")
 async def get_owner_dashboard(current_user: User = Depends(get_current_user)):
@@ -524,6 +871,159 @@ async def get_owner_dashboard(current_user: User = Depends(get_current_user)):
         "pending_payments": pending_payments,
         "property_earnings": property_earnings
     }
+
+# ============== RENTAL RECORDS MANAGEMENT ==============
+
+@api_router.get("/rentals/{property_id}")
+async def get_rental_record(property_id: str, current_user: User = Depends(get_current_user)):
+    """Get rental record for a property with all tenant details"""
+    if current_user.role not in ["admin", "owner"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    rental = await db.rental_records.find_one({"property_id": property_id}, {"_id": 0})
+    if not rental:
+        raise HTTPException(status_code=404, detail="No rental record found for this property")
+    
+    # If owner, verify they own the property
+    if current_user.role == "owner":
+        property_doc = await db.properties.find_one({"property_id": property_id}, {"_id": 0})
+        if not property_doc or property_doc.get("owner_id") != current_user.user_id:
+            raise HTTPException(status_code=403, detail="Not authorized to view this rental")
+    
+    # Get primary tenant details
+    primary_tenant = await db.users.find_one(
+        {"user_id": rental["primary_tenant_id"]}, 
+        {"_id": 0, "password": 0}
+    )
+    
+    return {
+        **rental,
+        "primary_tenant": primary_tenant
+    }
+
+@api_router.post("/rentals", response_model=RentalRecord)
+async def create_rental_record(rental_data: RentalRecordCreate, current_user: User = Depends(get_current_user)):
+    """Create a rental record with primary tenant and optional co-tenants"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can create rental records")
+    
+    # Verify property exists
+    property_doc = await db.properties.find_one({"property_id": rental_data.property_id}, {"_id": 0})
+    if not property_doc:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
+    # Verify primary tenant exists
+    primary_tenant = await db.users.find_one({"user_id": rental_data.primary_tenant_id}, {"_id": 0})
+    if not primary_tenant:
+        raise HTTPException(status_code=404, detail="Primary tenant not found")
+    
+    # Check if rental already exists for this property
+    existing = await db.rental_records.find_one({"property_id": rental_data.property_id}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Rental record already exists for this property")
+    
+    rental_id = f"rental_{uuid.uuid4().hex[:12]}"
+    rental_doc = {
+        "rental_id": rental_id,
+        "property_id": rental_data.property_id,
+        "primary_tenant_id": rental_data.primary_tenant_id,
+        "co_tenants": [ct.model_dump() for ct in rental_data.co_tenants] if rental_data.co_tenants else [],
+        "start_date": datetime.now(timezone.utc).isoformat(),
+        "monthly_rent": rental_data.monthly_rent or property_doc["rent_amount"],
+        "payment_status": "pending",
+        "last_payment_date": None,
+        "next_payment_due": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.rental_records.insert_one(rental_doc)
+    
+    # Update property status to occupied
+    await db.properties.update_one(
+        {"property_id": rental_data.property_id},
+        {"$set": {"status": "occupied"}}
+    )
+    
+    return RentalRecord(**rental_doc)
+
+@api_router.patch("/rentals/{rental_id}/co-tenants")
+async def update_co_tenants(rental_id: str, co_tenants: List[CoTenant], current_user: User = Depends(get_current_user)):
+    """Add or update co-tenants for a rental record"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can update co-tenants")
+    
+    rental = await db.rental_records.find_one({"rental_id": rental_id}, {"_id": 0})
+    if not rental:
+        raise HTTPException(status_code=404, detail="Rental record not found")
+    
+    await db.rental_records.update_one(
+        {"rental_id": rental_id},
+        {"$set": {"co_tenants": [ct.model_dump() for ct in co_tenants]}}
+    )
+    
+    return {"message": f"Updated co-tenants for rental {rental_id}", "co_tenant_count": len(co_tenants)}
+
+@api_router.post("/rentals/{rental_id}/co-tenants")
+async def add_co_tenant(rental_id: str, co_tenant: CoTenant, current_user: User = Depends(get_current_user)):
+    """Add a single co-tenant to an existing rental"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can add co-tenants")
+    
+    rental = await db.rental_records.find_one({"rental_id": rental_id}, {"_id": 0})
+    if not rental:
+        raise HTTPException(status_code=404, detail="Rental record not found")
+    
+    await db.rental_records.update_one(
+        {"rental_id": rental_id},
+        {"$push": {"co_tenants": co_tenant.model_dump()}}
+    )
+    
+    return {"message": f"Added co-tenant {co_tenant.name} to rental {rental_id}"}
+
+@api_router.delete("/rentals/{rental_id}/co-tenants/{co_tenant_email}")
+async def remove_co_tenant(rental_id: str, co_tenant_email: str, current_user: User = Depends(get_current_user)):
+    """Remove a co-tenant from a rental by email"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can remove co-tenants")
+    
+    rental = await db.rental_records.find_one({"rental_id": rental_id}, {"_id": 0})
+    if not rental:
+        raise HTTPException(status_code=404, detail="Rental record not found")
+    
+    await db.rental_records.update_one(
+        {"rental_id": rental_id},
+        {"$pull": {"co_tenants": {"email": co_tenant_email}}}
+    )
+    
+    return {"message": f"Removed co-tenant with email {co_tenant_email}"}
+
+@api_router.get("/admin/rentals")
+async def get_all_rentals(current_user: User = Depends(get_current_user)):
+    """Get all rental records with tenant details (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can view all rentals")
+    
+    rentals = await db.rental_records.find({}, {"_id": 0}).to_list(1000)
+    
+    # Enrich with tenant and property details
+    enriched_rentals = []
+    for rental in rentals:
+        primary_tenant = await db.users.find_one(
+            {"user_id": rental["primary_tenant_id"]},
+            {"_id": 0, "password": 0}
+        )
+        property_doc = await db.properties.find_one(
+            {"property_id": rental["property_id"]},
+            {"_id": 0}
+        )
+        enriched_rentals.append({
+            **rental,
+            "primary_tenant": primary_tenant,
+            "property": property_doc,
+            "total_occupants": 1 + len(rental.get("co_tenants", []))
+        })
+    
+    return enriched_rentals
 
 app.include_router(api_router)
 
