@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Building2, MapPin, Bed, Bath, Square, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { safeObject, safeArray, safeApiCall, safeGet } from '../utils/apiHelpers';
 
 function PropertyDetailPage() {
   const { id } = useParams();
@@ -27,7 +28,7 @@ function PropertyDetailPage() {
     try {
       const response = await api.get('/auth/me');
       setIsAuthenticated(true);
-      setUserRole(response.data.role);
+      setUserRole(response.data?.role);
     } catch {
       setIsAuthenticated(false);
       setUserRole(null);
@@ -35,10 +36,21 @@ function PropertyDetailPage() {
   };
 
   const fetchProperty = async () => {
+    setLoading(true);
     try {
-      const response = await api.get(`/properties/${id}`);
-      setProperty(response.data);
+      const data = await safeApiCall(
+        api.get(`/properties/${id}`),
+        null
+      );
+      const propertyObj = safeObject(data, null);
+      if (!propertyObj) {
+        toast.error('Property not found');
+        navigate('/properties');
+        return;
+      }
+      setProperty(propertyObj);
     } catch (error) {
+      console.error('Error fetching property:', error);
       toast.error('Property not found');
       navigate('/properties');
     } finally {
@@ -98,15 +110,22 @@ function PropertyDetailPage() {
           </Link>
         </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              {property.images.map((img, idx) => (
-                <div key={idx} className={`${idx === 0 ? 'col-span-2' : ''} h-64 rounded-2xl overflow-hidden`}>
-                  <img src={img} alt={property.title} className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
+        {property ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                {safeArray(property.images, []).length > 0 ? (
+                  safeArray(property.images, []).map((img, idx) => (
+                    <div key={idx} className={`${idx === 0 ? 'col-span-2' : ''} h-64 rounded-2xl overflow-hidden`}>
+                      <img src={img || '/placeholder-property.jpg'} alt={property.title || 'Property'} className="w-full h-full object-cover" />
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-2 h-64 rounded-2xl overflow-hidden bg-muted flex items-center justify-center">
+                    <p className="text-muted-foreground">No images available</p>
+                  </div>
+                )}
+              </div>
 
             <div className="bg-card p-8 rounded-2xl border shadow-sm space-y-6">
               <div>
@@ -142,20 +161,24 @@ function PropertyDetailPage() {
 
               <div>
                 <h2 className="text-xl font-semibold mb-3">Amenities</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {property.amenities.map((amenity, idx) => (
-                    <div key={idx} className="flex items-center space-x-2">
-                      <CheckCircle2 className="h-5 w-5 text-accent" />
-                      <span className="text-sm">{amenity}</span>
-                    </div>
-                  ))}
-                </div>
+                {safeArray(property.amenities, []).length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {safeArray(property.amenities, []).map((amenity, idx) => (
+                      <div key={idx} className="flex items-center space-x-2">
+                        <CheckCircle2 className="h-5 w-5 text-accent" />
+                        <span className="text-sm">{amenity}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No amenities listed</p>
+                )}
               </div>
             </div>
-          </div>
+            </div>
 
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-card p-8 rounded-2xl border shadow-sm space-y-6">
+            <div className="lg:col-span-1">
+              <div className="sticky top-24 bg-card p-8 rounded-2xl border shadow-sm space-y-6">
               <div>
                 <p className="text-sm text-muted-foreground">Monthly Rent</p>
                 <p className="text-4xl font-bold text-primary" data-testid="rent-amount">
@@ -231,9 +254,14 @@ function PropertyDetailPage() {
               <p className="text-xs text-muted-foreground text-center">
                 Our team will contact you within 24 hours to schedule your visit
               </p>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Property not found</p>
+          </div>
+        )}
       </div>
     </div>
   );

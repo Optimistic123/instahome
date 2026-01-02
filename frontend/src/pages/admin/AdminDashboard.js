@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { safeArray } from '../../utils/apiHelpers';
 
 function AdminDashboard({ user }) {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ function AdminDashboard({ user }) {
   const [owners, setOwners] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('visits');
+  const [loading, setLoading] = useState(true);
   
   // Create Owner Modal State
   const [showCreateOwner, setShowCreateOwner] = useState(false);
@@ -32,19 +34,27 @@ function AdminDashboard({ user }) {
   }, []);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
-      const [propsRes, visitsRes, agentsRes, ownersRes] = await Promise.all([
+      const [propsRes, visitsRes, agentsRes, ownersRes] = await Promise.allSettled([
         api.get('/properties'),
         api.get('/visit-requests'),
         api.get('/agents'),
         api.get('/admin/owners')
       ]);
-      setProperties(propsRes.data);
-      setVisits(visitsRes.data);
-      setAgents(agentsRes.data);
-      setOwners(ownersRes.data);
+      
+      setProperties(safeArray(propsRes.status === 'fulfilled' ? propsRes.value?.data : null, []));
+      setVisits(safeArray(visitsRes.status === 'fulfilled' ? visitsRes.value?.data : null, []));
+      setAgents(safeArray(agentsRes.status === 'fulfilled' ? agentsRes.value?.data : null, []));
+      setOwners(safeArray(ownersRes.status === 'fulfilled' ? ownersRes.value?.data : null, []));
     } catch (error) {
       console.error('Error fetching data:', error);
+      setProperties([]);
+      setVisits([]);
+      setAgents([]);
+      setOwners([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -484,6 +494,17 @@ function AdminDashboard({ user }) {
     owner.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     owner.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

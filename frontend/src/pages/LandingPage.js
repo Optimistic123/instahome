@@ -3,21 +3,31 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../App';
 import { Button } from '@/components/ui/button';
 import { Building2, Search, MapPin, Home, LogIn } from 'lucide-react';
+import { safeArray, safeApiCall } from '../utils/apiHelpers';
 
 function LandingPage() {
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchProperties();
   }, []);
 
   const fetchProperties = async () => {
+    setLoading(true);
     try {
-      const response = await api.get('/properties?status=available');
-      setProperties(response.data.slice(0, 3));
+      const data = await safeApiCall(
+        api.get('/properties?status=available'),
+        []
+      );
+      const propertiesArray = safeArray(data, []);
+      setProperties(propertiesArray.slice(0, 3));
     } catch (error) {
       console.error('Error fetching properties:', error);
+      setProperties([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,23 +90,33 @@ function LandingPage() {
             <p className="text-muted-foreground">Handpicked homes for your next chapter</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {properties.map((property) => (
-              <div
-                key={property.property_id}
-                className="property-card group bg-card rounded-2xl border overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1"
-                data-testid={`property-card-${property.property_id}`}
-              >
-                <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={property.images[0]}
-                    alt={property.title}
-                    className="property-card-image w-full h-full object-cover"
-                  />
-                  <div className="absolute top-4 right-4 bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium">
-                    ${property.rent_amount.toLocaleString()}/mo
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="text-muted-foreground mt-4">Loading properties...</p>
+            </div>
+          ) : properties.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No properties available at the moment.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {properties.map((property) => (
+                <div
+                  key={property.property_id}
+                  className="property-card group bg-card rounded-2xl border overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1"
+                  data-testid={`property-card-${property.property_id}`}
+                >
+                  <div className="relative h-56 overflow-hidden">
+                    <img
+                      src={property.images?.[0] || '/placeholder-property.jpg'}
+                      alt={property.title || 'Property'}
+                      className="property-card-image w-full h-full object-cover"
+                    />
+                    <div className="absolute top-4 right-4 bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium">
+                      ${(property.rent_amount || 0).toLocaleString()}/mo
+                    </div>
                   </div>
-                </div>
                 <div className="p-6 space-y-3">
                   <h3 className="text-xl font-semibold line-clamp-1" data-testid={`property-title-${property.property_id}`}>
                     {property.title}
@@ -121,8 +141,9 @@ function LandingPage() {
                   </Button>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-12">
             <Button size="lg" variant="outline" className="rounded-full" asChild data-testid="view-all-button">

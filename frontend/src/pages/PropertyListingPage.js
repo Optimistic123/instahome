@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Building2, MapPin, Search } from 'lucide-react';
+import { safeArray, safeApiCall, safeMap } from '../utils/apiHelpers';
 
 function PropertyListingPage() {
   const [properties, setProperties] = useState([]);
@@ -14,6 +15,7 @@ function PropertyListingPage() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchProperties();
@@ -24,7 +26,7 @@ function PropertyListingPage() {
     try {
       const response = await api.get('/auth/me');
       setIsAuthenticated(true);
-      setUserRole(response.data.role);
+      setUserRole(response.data?.role);
     } catch {
       setIsAuthenticated(false);
       setUserRole(null);
@@ -36,38 +38,47 @@ function PropertyListingPage() {
   }, [searchTerm, cityFilter, typeFilter, properties]);
 
   const fetchProperties = async () => {
+    setLoading(true);
     try {
-      const response = await api.get('/properties?status=available');
-      setProperties(response.data);
-      setFilteredProperties(response.data);
+      const data = await safeApiCall(
+        api.get('/properties?status=available'),
+        []
+      );
+      const propertiesArray = safeArray(data, []);
+      setProperties(propertiesArray);
+      setFilteredProperties(propertiesArray);
     } catch (error) {
       console.error('Error fetching properties:', error);
+      setProperties([]);
+      setFilteredProperties([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const filterProperties = () => {
-    let filtered = properties;
+    let filtered = safeArray(properties, []);
 
     if (searchTerm) {
       filtered = filtered.filter(p =>
-        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.city.toLowerCase().includes(searchTerm.toLowerCase())
+        p?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p?.city?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (cityFilter !== 'all') {
-      filtered = filtered.filter(p => p.city === cityFilter);
+      filtered = filtered.filter(p => p?.city === cityFilter);
     }
 
     if (typeFilter !== 'all') {
-      filtered = filtered.filter(p => p.property_type === typeFilter);
+      filtered = filtered.filter(p => p?.property_type === typeFilter);
     }
 
     setFilteredProperties(filtered);
   };
 
-  const cities = [...new Set(properties.map(p => p.city))];
-  const types = [...new Set(properties.map(p => p.property_type))];
+  const cities = [...new Set(safeMap(properties, p => p?.city, []).filter(Boolean))];
+  const types = [...new Set(safeMap(properties, p => p?.property_type, []).filter(Boolean))];
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,41 +141,47 @@ function PropertyListingPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-testid="property-grid">
-          {filteredProperties.map(property => (
-            <div
-              key={property.property_id}
-              className="property-card group bg-card rounded-2xl border overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1"
-              data-testid={`property-card-${property.property_id}`}
-            >
-              <div className="relative h-56 overflow-hidden">
-                <img
-                  src={property.images[0]}
-                  alt={property.title}
-                  className="property-card-image w-full h-full object-cover"
-                />
-                <div className="absolute top-4 right-4 bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium">
-                  ${property.rent_amount.toLocaleString()}/mo
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground mt-4">Loading properties...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-testid="property-grid">
+            {safeArray(filteredProperties, []).map(property => (
+              <div
+                key={property?.property_id || Math.random()}
+                className="property-card group bg-card rounded-2xl border overflow-hidden shadow-sm hover:shadow-lg transition-all hover:-translate-y-1"
+                data-testid={`property-card-${property?.property_id}`}
+              >
+                <div className="relative h-56 overflow-hidden">
+                  <img
+                    src={property?.images?.[0] || '/placeholder-property.jpg'}
+                    alt={property?.title || 'Property'}
+                    className="property-card-image w-full h-full object-cover"
+                  />
+                  <div className="absolute top-4 right-4 bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium">
+                    ${(property?.rent_amount || 0).toLocaleString()}/mo
+                  </div>
                 </div>
-              </div>
-              <div className="p-6 space-y-3">
-                <div className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs rounded-full font-medium">
-                  {property.property_type}
-                </div>
-                <h3 className="text-xl font-semibold line-clamp-1">
-                  {property.title}
-                </h3>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  <span className="line-clamp-1">{property.city}, {property.state}</span>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span>{property.bedrooms} Beds</span>
-                  <span>•</span>
-                  <span>{property.bathrooms} Baths</span>
-                  <span>•</span>
-                  <span>{property.area_sqft} sqft</span>
-                </div>
+                <div className="p-6 space-y-3">
+                  <div className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs rounded-full font-medium">
+                    {property?.property_type || 'Property'}
+                  </div>
+                  <h3 className="text-xl font-semibold line-clamp-1">
+                    {property?.title || 'Untitled Property'}
+                  </h3>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    <span className="line-clamp-1">{property?.city || ''}, {property?.state || ''}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span>{property?.bedrooms || 0} Beds</span>
+                    <span>•</span>
+                    <span>{property?.bathrooms || 0} Baths</span>
+                    <span>•</span>
+                    <span>{property?.area_sqft || 0} sqft</span>
+                  </div>
                 <Button
                   className="w-full rounded-full mt-4"
                   asChild
@@ -174,10 +191,11 @@ function PropertyListingPage() {
                 </Button>
               </div>
             </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
-        {filteredProperties.length === 0 && (
+        {!loading && filteredProperties.length === 0 && (
           <div className="text-center py-12" data-testid="no-results">
             <p className="text-muted-foreground">No properties found matching your criteria.</p>
           </div>

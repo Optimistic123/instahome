@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { safeArray, safeApiCall, safeMap } from '../../utils/apiHelpers';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,22 +25,36 @@ function TenantDashboard({ user }) {
   const [visits, setVisits] = useState([]);
   const [properties, setProperties] = useState([]);
   const [archivedVisits, setArchivedVisits] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchVisits();
   }, []);
 
   const fetchVisits = async () => {
+    setLoading(true);
     try {
-      const response = await api.get('/visit-requests');
-      setVisits(response.data);
+      const visitsData = await safeApiCall(
+        api.get('/visit-requests'),
+        []
+      );
+      const visitsArray = safeArray(visitsData, []);
+      setVisits(visitsArray);
       
-      const propIds = [...new Set(response.data.map(v => v.property_id))];
+      const propIds = [...new Set(safeMap(visitsArray, v => v?.property_id, []).filter(Boolean))];
       const propPromises = propIds.map(id => api.get(`/properties/${id}`));
-      const propResponses = await Promise.all(propPromises);
-      setProperties(propResponses.map(r => r.data));
+      const propResponses = await Promise.allSettled(propPromises);
+      const validProperties = propResponses
+        .filter(r => r.status === 'fulfilled')
+        .map(r => r.value?.data)
+        .filter(Boolean);
+      setProperties(validProperties);
     } catch (error) {
       console.error('Error fetching visits:', error);
+      setVisits([]);
+      setProperties([]);
+    } finally {
+      setLoading(false);
     }
   };
 
