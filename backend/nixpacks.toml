@@ -1,7 +1,7 @@
 providers = ["python"]
 
 [phases.setup]
-nixPkgs = ["python39", "pip"]
+nixPkgs = ["python39"]
 
 [phases.install]
 cmds = [
