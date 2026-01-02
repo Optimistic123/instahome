@@ -99,7 +99,69 @@ db.createUser({
 
 ## Backend Deployment
 
-### Option 1: Heroku
+### Option 1: Railway (Recommended)
+
+Railway is the easiest and most modern platform for deploying FastAPI applications. It offers automatic HTTPS, easy environment variable management, and a generous free tier.
+
+**Quick Setup:**
+
+1. **Sign up**: Go to [railway.app](https://railway.app) and sign up with GitHub
+
+2. **Create New Project**:
+   - Click "New Project"
+   - Select "Deploy from GitHub repo"
+   - Choose your repository
+   - Select the `instahome/backend` directory as root
+
+3. **Set Environment Variables** (in Railway Dashboard → Variables):
+   ```
+   MONGO_URL=your-mongodb-connection-string
+   DB_NAME=rental_management_prod
+   JWT_SECRET=your-secure-jwt-secret-here
+   CORS_ORIGINS=https://your-frontend-domain.com,http://localhost:3000
+   ```
+
+4. **Deploy**: Railway automatically detects Python/FastAPI and deploys
+
+5. **Get Your URL**: Railway provides a URL like `https://your-app.up.railway.app`
+
+**Using Railway CLI:**
+
+```bash
+# Install Railway CLI
+npm install -g @railway/cli
+
+# Login
+railway login
+
+# Initialize (in backend directory)
+cd backend
+railway init
+
+# Set environment variables
+railway variables set MONGO_URL="your-mongodb-url"
+railway variables set DB_NAME="rental_management_prod"
+railway variables set JWT_SECRET="your-jwt-secret"
+railway variables set CORS_ORIGINS="https://your-frontend-domain.com"
+
+# Deploy
+railway up
+
+# View logs
+railway logs
+```
+
+**Features:**
+- ✅ Automatic HTTPS/SSL
+- ✅ Free tier ($5 credit/month)
+- ✅ Auto-deploy from GitHub
+- ✅ Built-in MongoDB plugin option
+- ✅ Custom domains support
+- ✅ Easy environment variable management
+
+For detailed Railway deployment guide, see [backend/RAILWAY_DEPLOYMENT.md](backend/RAILWAY_DEPLOYMENT.md)
+
+### Option 2: Heroku
 
 1. **Install Heroku CLI**:
 ```bash
