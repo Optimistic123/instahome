@@ -5,11 +5,11 @@ nixPkgs = ["python39"]
 
 [phases.install]
 cmds = [
-  "python3 -m ensurepip --upgrade",
-  "python3 -m pip install --upgrade pip",
-  "python3 -m pip install -r requirements.txt"
+  "python3 -m venv /opt/venv",
+  "/opt/venv/bin/pip install --upgrade pip",
+  "/opt/venv/bin/pip install -r requirements.txt"
 ]
 
 [start]
-cmd = "uvicorn server:app --host 0.0.0.0 --port ${PORT:-8000}"
+cmd = "/opt/venv/bin/uvicorn server:app --host 0.0.0.0 --port ${PORT:-8000}"
 
