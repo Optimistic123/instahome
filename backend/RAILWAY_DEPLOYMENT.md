@@ -20,7 +20,11 @@ This guide will help you deploy your FastAPI backend to Railway.
    - Click "New Project"
    - Select "Deploy from GitHub repo"
    - Choose your repository
-   - Select the `instahome/backend` directory as the root directory
+   - **IMPORTANT**: After creating the project, you need to configure the root directory:
+     - Go to your service → Settings → Source
+     - Set **Root Directory** to: `instahome/backend`
+     - Or if your repo structure is different, set it to: `backend`
+   - This tells Railway to use the backend directory as the root for building
 
 3. **Configure Environment Variables**
    - Go to your service → Variables tab
@@ -137,6 +141,21 @@ curl https://your-app.up.railway.app/api/
 ```
 
 ## Troubleshooting
+
+### Railway Can't Detect Python / Build Fails
+
+**Error**: "Railpack could not determine how to build the app"
+
+**Solution**: 
+1. Go to your Railway service → **Settings** → **Source**
+2. Set **Root Directory** to: `instahome/backend` (or `backend` depending on your repo structure)
+3. Save and redeploy
+
+The root directory must point to the folder containing:
+- `server.py`
+- `requirements.txt`
+- `Procfile`
+- `nixpacks.toml` (we've created this for you)
 
 ### Build Fails
 - Check that `requirements.txt` is in the backend directory
