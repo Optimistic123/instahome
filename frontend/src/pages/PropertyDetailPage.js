@@ -16,6 +16,7 @@ function PropertyDetailPage() {
   const [visitData, setVisitData] = useState({ name: '', phone: '', preferred_date: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     fetchProperty();
@@ -24,10 +25,12 @@ function PropertyDetailPage() {
 
   const checkAuth = async () => {
     try {
-      await api.get('/auth/me');
+      const response = await api.get('/auth/me');
       setIsAuthenticated(true);
+      setUserRole(response.data.role);
     } catch {
       setIsAuthenticated(false);
+      setUserRole(null);
     }
   };
 
@@ -80,7 +83,7 @@ function PropertyDetailPage() {
               <span className="text-2xl font-bold">RentalSquare</span>
             </Link>
             <Button asChild variant="ghost" className="rounded-full">
-              <Link to={isAuthenticated ? '/dashboard/tenant' : '/login'}>
+              <Link to={isAuthenticated ? `/dashboard/${userRole}` : '/login'}>
                 {isAuthenticated ? 'Dashboard' : 'Sign In'}
               </Link>
             </Button>

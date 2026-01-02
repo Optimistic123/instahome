@@ -12,10 +12,24 @@ function PropertyListingPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [cityFilter, setCityFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     fetchProperties();
+    checkAuth();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await api.get('/auth/me');
+      setIsAuthenticated(true);
+      setUserRole(response.data.role);
+    } catch {
+      setIsAuthenticated(false);
+      setUserRole(null);
+    }
+  };
 
   useEffect(() => {
     filterProperties();
@@ -65,7 +79,9 @@ function PropertyListingPage() {
               <span className="text-2xl font-bold">RentalSquare</span>
             </Link>
             <Button asChild variant="ghost" className="rounded-full" data-testid="login-button">
-              <Link to="/login">Sign In</Link>
+              <Link to={isAuthenticated ? `/dashboard/${userRole}` : '/login'}>
+                {isAuthenticated ? 'Dashboard' : 'Sign In'}
+              </Link>
             </Button>
           </div>
         </div>
