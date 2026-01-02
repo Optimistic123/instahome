@@ -4,8 +4,9 @@ import { api } from '../App';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building2, MapPin, Search } from 'lucide-react';
+import { MapPin, Search } from 'lucide-react';
 import { safeArray, safeApiCall, safeMap } from '../utils/apiHelpers';
+import CustomIcon from '@/components/CustomIcon';
 
 function PropertyListingPage() {
   const [properties, setProperties] = useState([]);
@@ -86,8 +87,8 @@ function PropertyListingPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-2" data-testid="logo-link">
-              <Building2 className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">RentalSquare</span>
+              <CustomIcon src="/images/orglogo.png" className="h-12 w-12 sm:h-14 sm:w-14" alt="InstaMakaan Logo" />
+              <span className="text-2xl font-bold">InstaMakaan</span>
             </Link>
             <Button asChild variant="ghost" className="rounded-full" data-testid="login-button">
               <Link to={isAuthenticated ? `/dashboard/${userRole}` : '/login'}>

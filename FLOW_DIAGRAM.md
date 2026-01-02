@@ -1,4 +1,4 @@
-# RentalSquare - Project Flow Diagram
+# InstaMakaan - Project Flow Diagram
 
 ## 🏗️ System Architecture
 

@@ -1,13 +1,13 @@
-# RentalSquare - AI Context & Requirements Prompt
+# InstaMakaan - AI Context & Requirements Prompt
 
-> **Purpose**: This document serves as a comprehensive context prompt for AI assistants to understand and work with the RentalSquare rental property management system.
+> **Purpose**: This document serves as a comprehensive context prompt for AI assistants to understand and work with the InstaMakaan rental property management system.
 
 ---
 
 ## 📋 PROJECT OVERVIEW
 
-### What is RentalSquare?
-RentalSquare is a full-stack rental property management platform that connects property owners, tenants, and real estate agents under a unified admin-managed system. The platform enables:
+### What is InstaMakaan?
+InstaMakaan is a full-stack rental property management platform that connects property owners, tenants, and real estate agents under a unified admin-managed system. The platform enables:
 
 - **Property Owners** to list and manage their rental properties
 - **Tenants** to browse properties and request visits
@@ -508,5 +508,5 @@ When working with this codebase:
 
 ---
 
-*This prompt file should be used as context when asking AI assistants to help with development, debugging, or extending the RentalSquare platform.*
+*This prompt file should be used as context when asking AI assistants to help with development, debugging, or extending the InstaMakaan platform.*
 

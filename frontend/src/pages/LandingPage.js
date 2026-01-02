@@ -2,8 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../App';
 import { Button } from '@/components/ui/button';
-import { Building2, Search, MapPin, Home, LogIn } from 'lucide-react';
+import { Search, MapPin, Home, LogIn } from 'lucide-react';
 import { safeArray, safeApiCall } from '../utils/apiHelpers';
+import CustomIcon from '@/components/CustomIcon';
+// Import your logo icon from assets folder
+// Uncomment and update path when you add your icon:
+// import logoIcon from '@/assets/icons/logo.svg';
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -37,8 +41,11 @@ function LandingPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-2" data-testid="logo-link">
-              <Building2 className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold tracking-tight">RentalSquare</span>
+              {/* Option 1: Use imported icon from assets folder */}
+              {/* <CustomIcon src={logoIcon} className="h-12 w-12" alt="InstaMakaan Logo" /> */}
+              {/* Option 2: Use icon from public folder */}
+              <CustomIcon src="/images/orglogo.png" className="h-12 w-12 sm:h-14 sm:w-14" alt="InstaMakaan Logo" />
+              <span className="text-2xl font-bold tracking-tight">InstaMakaan</span>
             </Link>
             
             <nav className="hidden md:flex items-center space-x-8">
@@ -158,7 +165,8 @@ function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center space-y-4 p-8 rounded-2xl bg-primary/5">
               <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-                <Building2 className="h-8 w-8 text-primary" />
+                {/* Use your icon here - same as header logo */}
+                <CustomIcon src="/images/orglogo.png" className="h-8 w-8" alt="Verified Properties" />
               </div>
               <h3 className="text-xl font-semibold">Verified Properties</h3>
               <p className="text-muted-foreground text-sm">
@@ -189,7 +197,7 @@ function LandingPage() {
 
       <footer className="bg-muted/30 py-12 border-t">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-          <p>© 2024 RentalSquare. All rights reserved.</p>
+          <p>© 2024 InstaMakaan. All rights reserved.</p>
         </div>
       </footer>
     </div>

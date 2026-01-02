@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Building2, MapPin, Bed, Bath, Square, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, CheckCircle2, ArrowLeft } from 'lucide-react';
+import CustomIcon from '@/components/CustomIcon';
 import { toast } from 'sonner';
 import { safeObject, safeArray, safeApiCall, safeGet } from '../utils/apiHelpers';
 
@@ -91,8 +92,8 @@ function PropertyDetailPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">RentalSquare</span>
+              <CustomIcon src="/images/orglogo.png" className="h-12 w-12 sm:h-14 sm:w-14" alt="InstaMakaan Logo" />
+              <span className="text-2xl font-bold">InstaMakaan</span>
             </Link>
             <Button asChild variant="ghost" className="rounded-full">
               <Link to={isAuthenticated ? `/dashboard/${userRole}` : '/login'}>
