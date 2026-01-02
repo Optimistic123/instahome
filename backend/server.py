@@ -19,7 +19,18 @@ load_dotenv(ROOT_DIR / '.env')
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+
+# Validate DB_NAME - MongoDB doesn't allow periods, spaces, or certain special characters
+db_name = os.environ.get('DB_NAME', '')
+if not db_name:
+    raise ValueError("DB_NAME environment variable is required")
+if '.' in db_name or ' ' in db_name:
+    raise ValueError(
+        f"Invalid DB_NAME '{db_name}': MongoDB database names cannot contain periods (.) or spaces. "
+        f"Please use underscores (_) or hyphens (-) instead. "
+        f"Example: 'rental_management_prod' or 'rental-management-prod'"
+    )
+db = client[db_name]
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
