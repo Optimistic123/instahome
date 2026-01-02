@@ -197,7 +197,7 @@ function LandingPage() {
 
       <footer className="bg-muted/30 py-12 border-t">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-          <p>© 2024 InstaMakaan. All rights reserved.</p>
+          <p>© 2026 InstaMakaan. All rights reserved.</p>
         </div>
       </footer>
     </div>
