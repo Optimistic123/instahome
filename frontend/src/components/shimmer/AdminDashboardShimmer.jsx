@@ -8,31 +8,33 @@ function AdminDashboardShimmer() {
   return (
     <div className="min-h-screen bg-background">
       <header className="glass-effect sticky top-0 z-50 border-b">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">Admin Dashboard</span>
+        <div className="container mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+              <span className="text-base sm:text-2xl font-bold truncate">Admin Dashboard</span>
             </div>
-            <div className="flex items-center space-x-4">
-              <ShimmerBox width="120px" height="16px" />
-              <ShimmerBox width="100px" height="32px" className="rounded-full" />
+            <div className="flex items-center space-x-1 sm:space-x-4">
+              <ShimmerBox width="80px" height="16px" className="hidden sm:block" />
+              <ShimmerBox width="60px" height="16px" className="sm:hidden" />
+              <ShimmerBox width="80px" height="32px" className="rounded-full hidden sm:block" />
+              <ShimmerBox width="32px" height="32px" className="rounded-full sm:hidden" />
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-6 mb-8">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-card p-6 rounded-xl border">
+            <div key={i} className="bg-card p-3 md:p-6 rounded-lg md:rounded-xl border shadow-sm">
               <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <ShimmerBox width="120px" height="16px" className="mb-2" />
-                  <ShimmerBox width="80px" height="36px" />
+                <div className="flex-1 min-w-0">
+                  <ShimmerBox width="80px" height="12px" className="mb-1 md:mb-2" />
+                  <ShimmerBox width="50px" height="24px" className="md:h-9" />
                 </div>
-                <ShimmerBox width="48px" height="48px" className="rounded-full" />
+                <ShimmerBox width="32px" height="32px" className="rounded-full flex-shrink-0 ml-1 md:ml-2 md:w-12 md:h-12" />
               </div>
             </div>
           ))}
@@ -40,15 +42,17 @@ function AdminDashboardShimmer() {
 
         {/* Tabs */}
         <Tabs defaultValue="visits" className="space-y-6">
-          <div className="flex items-center justify-between">
-            <TabsList>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <TabsList className="flex flex-wrap sm:flex-nowrap gap-1 w-full md:w-auto h-auto py-1">
               <TabsTrigger value="visits">Visit Requests</TabsTrigger>
               <TabsTrigger value="properties">Properties</TabsTrigger>
               <TabsTrigger value="owners">Owners</TabsTrigger>
               <TabsTrigger value="agents">Agents</TabsTrigger>
               <TabsTrigger value="agent-view">Agent View</TabsTrigger>
             </TabsList>
-            <ShimmerBox width="288px" height="40px" className="rounded-md" />
+            <div className="relative w-full md:w-80">
+              <ShimmerBox width="100%" height="40px" className="rounded-md" />
+            </div>
           </div>
 
           <TabsContent value="visits" className="bg-card rounded-xl border p-6">

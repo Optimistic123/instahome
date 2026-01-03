@@ -503,84 +503,86 @@ function AdminDashboard({ user }) {
   return (
     <div className="min-h-screen bg-background">
       <header className="glass-effect sticky top-0 z-50 border-b">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">Admin Dashboard</span>
+        <div className="container mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+              <span className="text-base sm:text-2xl font-bold truncate">Admin Dashboard</span>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">Welcome, {user?.name}</span>
+            <div className="flex items-center space-x-1 sm:space-x-4">
+              <span className="hidden sm:inline text-sm text-muted-foreground">Welcome, {user?.name}</span>
+              <span className="sm:hidden text-xs text-muted-foreground truncate max-w-[80px]">{user?.name}</span>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="rounded-full" data-testid="logout-button">
-                <LogOut className="h-4 w-4 mr-2" /> Logout
+                <LogOut className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-card p-6 rounded-xl border">
+      <div className="container mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-6 mb-8">
+          <div className="bg-card p-3 md:p-6 rounded-lg md:rounded-xl border shadow-sm">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Properties</p>
-                <p className="text-3xl font-bold mt-2">{properties.length}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm text-muted-foreground truncate">Total Properties</p>
+                <p className="text-xl md:text-3xl font-bold mt-1 md:mt-2">{properties.length}</p>
               </div>
-              <Building2 className="h-12 w-12 text-primary opacity-20" />
+              <Building2 className="h-8 w-8 md:h-12 md:w-12 text-primary opacity-20 flex-shrink-0 ml-1 md:ml-2" />
             </div>
           </div>
-          <div className="bg-card p-6 rounded-xl border">
+          <div className="bg-card p-3 md:p-6 rounded-lg md:rounded-xl border shadow-sm">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Property Owners</p>
-                <p className="text-3xl font-bold mt-2">{owners.length}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm text-muted-foreground truncate">Property Owners</p>
+                <p className="text-xl md:text-3xl font-bold mt-1 md:mt-2">{owners.length}</p>
               </div>
-              <Home className="h-12 w-12 text-accent opacity-20" />
+              <Home className="h-8 w-8 md:h-12 md:w-12 text-accent opacity-20 flex-shrink-0 ml-1 md:ml-2" />
             </div>
           </div>
-          <div className="bg-card p-6 rounded-xl border">
+          <div className="bg-card p-3 md:p-6 rounded-lg md:rounded-xl border shadow-sm">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Visit Requests</p>
-                <p className="text-3xl font-bold mt-2">{visits.length}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm text-muted-foreground truncate">Visit Requests</p>
+                <p className="text-xl md:text-3xl font-bold mt-1 md:mt-2">{visits.length}</p>
               </div>
-              <Eye className="h-12 w-12 text-primary opacity-20" />
+              <Eye className="h-8 w-8 md:h-12 md:w-12 text-primary opacity-20 flex-shrink-0 ml-1 md:ml-2" />
             </div>
           </div>
-          <div className="bg-card p-6 rounded-xl border">
+          <div className="bg-card p-3 md:p-6 rounded-lg md:rounded-xl border shadow-sm">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Active Agents</p>
-                <p className="text-3xl font-bold mt-2">{agents.length}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm text-muted-foreground truncate">Active Agents</p>
+                <p className="text-xl md:text-3xl font-bold mt-1 md:mt-2">{agents.length}</p>
               </div>
-              <Users className="h-12 w-12 text-primary opacity-20" />
+              <Users className="h-8 w-8 md:h-12 md:w-12 text-primary opacity-20 flex-shrink-0 ml-1 md:ml-2" />
             </div>
           </div>
         </div>
 
         <Tabs defaultValue="visits" className="space-y-6" onValueChange={setActiveTab}>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <TabsList className="flex flex-wrap gap-1 w-full sm:w-auto">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <TabsList className="flex flex-wrap sm:flex-nowrap gap-1 w-full md:w-auto h-auto py-1">
               <TabsTrigger value="visits">Visit Requests</TabsTrigger>
               <TabsTrigger value="properties">Properties</TabsTrigger>
               <TabsTrigger value="owners">Owners</TabsTrigger>
               <TabsTrigger value="agents">Agents</TabsTrigger>
               <TabsTrigger value="agent-view">Agent View</TabsTrigger>
             </TabsList>
-            <div className="relative w-full sm:w-72 flex-shrink-0">
+            <div className="relative w-full md:w-80">
+              <Eye className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 placeholder={`Search ${activeTab}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-10"
+                className="pl-10 pr-10 h-10 bg-background"
                 data-testid="admin-search-input"
               />
-              <Eye className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   data-testid="clear-search-button"
                 >
                   <X className="h-4 w-4" />
@@ -822,7 +824,7 @@ function AdminDashboard({ user }) {
                       </div>
                     </div>
 
-                    <DialogFooter>
+                    <DialogFooter className="flex-row justify-end space-x-2">
                       <Button type="button" variant="outline" onClick={() => setShowCreateProperty(false)}>
                         Cancel
                       </Button>
@@ -933,22 +935,22 @@ function AdminDashboard({ user }) {
                     </p>
                   </div>
                 )}
-                <DialogFooter>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setShowDeletePropertyDialog(false)}
-                    disabled={deletingProperty}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    onClick={handleDeleteProperty}
-                    disabled={deletingProperty}
-                  >
-                    {deletingProperty ? 'Deleting...' : 'Delete Property'}
-                  </Button>
-                </DialogFooter>
+                      <DialogFooter className="flex-row justify-end space-x-2">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setShowDeletePropertyDialog(false)}
+                          disabled={deletingProperty}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          onClick={handleDeleteProperty}
+                          disabled={deletingProperty}
+                        >
+                          {deletingProperty ? 'Deleting...' : 'Delete Property'}
+                        </Button>
+                      </DialogFooter>
               </DialogContent>
             </Dialog>
 
@@ -1077,7 +1079,7 @@ function AdminDashboard({ user }) {
                         />
                       </div>
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="flex-row justify-end space-x-2">
                       <Button type="button" variant="outline" onClick={() => setShowEditPropertyDialog(false)}>
                         Cancel
                       </Button>
@@ -1134,7 +1136,7 @@ function AdminDashboard({ user }) {
                       <p className="text-xs text-muted-foreground">
                         ⚠️ Please save this password! It won't be shown again.
                       </p>
-                      <DialogFooter>
+                      <DialogFooter className="flex-row justify-end space-x-2">
                         <Button onClick={closeCreateOwnerDialog} className="w-full">
                           Done
                         </Button>
@@ -1181,7 +1183,7 @@ function AdminDashboard({ user }) {
                           onChange={(e) => setNewOwner({ ...newOwner, address: e.target.value })}
                         />
                       </div>
-                      <DialogFooter>
+                      <DialogFooter className="flex-row justify-end space-x-2">
                         <Button type="button" variant="outline" onClick={closeCreateOwnerDialog}>
                           Cancel
                         </Button>
@@ -1272,7 +1274,7 @@ function AdminDashboard({ user }) {
                     </p>
                   </div>
                 )}
-                <DialogFooter>
+                <DialogFooter className="flex-row justify-end space-x-2">
                   <Button 
                     variant="outline" 
                     onClick={() => setShowDeleteOwnerDialog(false)}
@@ -1331,7 +1333,7 @@ function AdminDashboard({ user }) {
                         onChange={(e) => setEditOwnerData({ ...editOwnerData, address: e.target.value })}
                       />
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="flex-row justify-end space-x-2">
                       <Button type="button" variant="outline" onClick={() => setShowEditOwnerDialog(false)}>
                         Cancel
                       </Button>
@@ -1394,7 +1396,7 @@ function AdminDashboard({ user }) {
                       <p className="text-xs text-muted-foreground">
                         ⚠️ Please save this password! It won't be shown again.
                       </p>
-                      <DialogFooter>
+                      <DialogFooter className="flex-row justify-end space-x-2">
                         <Button onClick={closeCreateAgentDialog} className="w-full">
                           Done
                         </Button>
@@ -1450,7 +1452,7 @@ function AdminDashboard({ user }) {
                           </SelectContent>
                         </Select>
                       </div>
-                      <DialogFooter>
+                      <DialogFooter className="flex-row justify-end space-x-2">
                         <Button type="button" variant="outline" onClick={closeCreateAgentDialog}>
                           Cancel
                         </Button>
@@ -1548,7 +1550,7 @@ function AdminDashboard({ user }) {
                     </p>
                   </div>
                 )}
-                <DialogFooter>
+                <DialogFooter className="flex-row justify-end space-x-2">
                   <Button 
                     variant="outline" 
                     onClick={() => setShowDeleteAgentDialog(false)}
@@ -1617,7 +1619,7 @@ function AdminDashboard({ user }) {
                         </SelectContent>
                       </Select>
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="flex-row justify-end space-x-2">
                       <Button type="button" variant="outline" onClick={() => setShowEditAgentDialog(false)}>
                         Cancel
                       </Button>

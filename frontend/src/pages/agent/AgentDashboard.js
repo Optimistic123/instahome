@@ -108,31 +108,33 @@ function AgentDashboard({ user }) {
   return (
     <div className="min-h-screen bg-background">
       <header className="glass-effect sticky top-0 z-50 border-b">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">Agent Dashboard</span>
+        <div className="container mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+              <span className="text-base sm:text-2xl font-bold truncate">Agent Dashboard</span>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">Welcome, {user?.name}</span>
+            <div className="flex items-center space-x-1 sm:space-x-4">
+              <span className="hidden sm:inline text-sm text-muted-foreground">Welcome, {user?.name}</span>
+              <span className="sm:hidden text-xs text-muted-foreground truncate max-w-[80px]">{user?.name}</span>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="rounded-full">
-                <LogOut className="h-4 w-4 mr-2" /> Logout
+                <LogOut className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Assigned Visits</h1>
-          <p className="text-muted-foreground">Manage your assigned property visits</p>
+      <div className="container mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Assigned Visits</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Manage your assigned property visits</p>
         </div>
 
         <div className="flex items-center justify-end mb-4">
           <Select value={stageFilter} onValueChange={setStageFilter}>
-            <SelectTrigger className="w-48" data-testid="stage-filter">
+            <SelectTrigger className="w-full sm:w-48" data-testid="stage-filter">
               <SelectValue placeholder="All Stages" />
             </SelectTrigger>
             <SelectContent>
@@ -145,17 +147,17 @@ function AgentDashboard({ user }) {
           </Select>
         </div>
 
-        <div className="bg-card rounded-xl border">
+        <div className="bg-card rounded-xl border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12"></TableHead>
-                <TableHead>Property</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Stage</TableHead>
-                <TableHead>Last Updated</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="min-w-[150px]">Property</TableHead>
+                <TableHead className="min-w-[120px]">User</TableHead>
+                <TableHead className="hidden md:table-cell">Phone</TableHead>
+                <TableHead className="min-w-[100px]">Stage</TableHead>
+                <TableHead className="hidden lg:table-cell">Last Updated</TableHead>
+                <TableHead className="min-w-[180px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -182,17 +184,17 @@ function AgentDashboard({ user }) {
                       </TableCell>
                       <TableCell className="font-medium">{property?.title}</TableCell>
                       <TableCell>{visit.user_name}</TableCell>
-                      <TableCell>{visit.user_phone}</TableCell>
+                      <TableCell className="hidden md:table-cell">{visit.user_phone}</TableCell>
                       <TableCell>
-                        <Badge>{visit.stage}</Badge>
+                        <Badge className="text-xs whitespace-nowrap">{visit.stage}</Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
                         {new Date(visit.updated_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 sm:gap-2">
                           <Select onValueChange={(value) => updateStage(visit.visit_id, value)}>
-                            <SelectTrigger className="w-40">
+                            <SelectTrigger className="w-32 sm:w-40 text-xs sm:text-sm">
                               <SelectValue placeholder="Update Stage" />
                             </SelectTrigger>
                             <SelectContent>
@@ -207,6 +209,7 @@ function AgentDashboard({ user }) {
                               <Button 
                                 variant="ghost" 
                                 size="sm"
+                                className="h-8 w-8 p-0"
                                 data-testid={`view-activity-${visit.visit_id}`}
                                 onClick={() => {
                                   setNotesText({ ...notesText, [visit.visit_id]: visit.notes || '' });
@@ -216,31 +219,31 @@ function AgentDashboard({ user }) {
                                 <Clock className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[80vh] overflow-y-auto">
                               <DialogHeader>
-                                <DialogTitle>Activity Timeline - {property?.title}</DialogTitle>
+                                <DialogTitle className="text-base sm:text-lg pr-6">{property?.title}</DialogTitle>
                               </DialogHeader>
                               <div className="space-y-4 mt-4">
-                                <div className="flex items-center gap-2 mb-4 p-3 bg-muted/50 rounded-lg">
+                                <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
                                   <div className="text-sm">
                                     <p className="font-medium">{visit.user_name}</p>
-                                    <p className="text-muted-foreground">{visit.user_email}</p>
-                                    <p className="text-muted-foreground">{visit.user_phone}</p>
+                                    <p className="text-muted-foreground text-xs sm:text-sm">{visit.user_email}</p>
+                                    <p className="text-muted-foreground text-xs sm:text-sm">{visit.user_phone}</p>
                                   </div>
                                 </div>
                                 
                                 <div className="mb-4">
-                                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                  <h4 className="font-semibold mb-3 flex items-center gap-2 text-sm sm:text-base">
                                     <Clock className="h-4 w-4" />
                                     Complete Activity History
                                   </h4>
                                   <div className="space-y-3">
                                     {activities.map((activity, index) => (
-                                      <div key={index} className="flex gap-4 pb-3 border-b last:border-b-0">
+                                      <div key={index} className="flex gap-3 sm:gap-4 pb-3 border-b last:border-b-0">
                                         <div className="flex-shrink-0 w-2 h-2 rounded-full bg-primary mt-2"></div>
-                                        <div className="flex-1">
-                                          <p className="font-medium">{activity.action}</p>
-                                          <p className="text-xs text-muted-foreground mt-1">
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-medium text-sm break-words">{activity.action}</p>
+                                          <p className="text-xs text-muted-foreground mt-1 break-words">
                                             {new Date(activity.timestamp).toLocaleString()} • by {activity.actor} ({activity.actor_role})
                                           </p>
                                         </div>
@@ -249,7 +252,7 @@ function AgentDashboard({ user }) {
                                   </div>
                                 </div>
 
-                                <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                                <div className="mt-4 p-3 sm:p-4 bg-muted/30 rounded-lg">
                                   <div className="flex items-center justify-between mb-2">
                                     <p className="text-sm font-medium">Notes:</p>
                                     {!editingNotes[visit.visit_id] && (
@@ -270,6 +273,7 @@ function AgentDashboard({ user }) {
                                         onChange={(e) => setNotesText({ ...notesText, [visit.visit_id]: e.target.value })}
                                         placeholder="Add notes about this visit..."
                                         rows={4}
+                                        className="text-sm"
                                         data-testid={`notes-textarea-${visit.visit_id}`}
                                       />
                                       <div className="flex gap-2">
@@ -291,7 +295,7 @@ function AgentDashboard({ user }) {
                                       </div>
                                     </div>
                                   ) : (
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-sm text-muted-foreground break-words">
                                       {visit.notes || 'No notes added yet'}
                                     </p>
                                   )}
