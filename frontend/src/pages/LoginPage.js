@@ -140,7 +140,7 @@ function LoginPage() {
             </div>
           </div>
 
-          <Button
+          {/* <Button
             type="button"
             variant="outline"
             className="w-full h-11 rounded-full"
@@ -149,14 +149,14 @@ function LoginPage() {
           >
             <Chrome className="mr-2 h-5 w-5" />
             Sign in with Google
-          </Button>
+          </Button> */}
 
-          <div className="text-center text-sm">
+          {/* <div className="text-center text-sm">
             <span className="text-muted-foreground">Don't have an account? </span>
             <Link to="/register" className="text-primary hover:underline font-medium" data-testid="register-link">
               Sign up
             </Link>
-          </div>
+          </div> */}
 
           <div className="mt-8 p-4 bg-muted rounded-lg">
             <p className="text-xs text-muted-foreground mb-2 font-medium">Demo Credentials:</p>
